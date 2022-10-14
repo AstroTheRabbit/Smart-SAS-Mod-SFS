@@ -117,7 +117,7 @@ namespace SmartSASMod
                 MsgDrawer.main.Log("You aren't controlling a rocket...");
                 return;
             }
-            else if ((PlayerController.main.player.Value as Rocket).partHolder.GetModules<ControlModule>().Any((ControlModule module) => module.hasControl.Value))
+            else if (!(PlayerController.main.player.Value as Rocket).hasControl.Value)
             {
                 MsgDrawer.main.Log("Rocket is uncontrollable, cannot change SAS");
                 return;  
