@@ -112,7 +112,7 @@ namespace SmartSASMod
 
         static void FollowDirection(DirectionMode direction)
         {
-            if (!(PlayerController.main.player.Value is Rocket rocket))
+            if (!(PlayerController.main.player.Value is Rocket))
             {
                 MsgDrawer.main.Log("You aren't controlling a rocket...");
                 return;
@@ -143,7 +143,7 @@ namespace SmartSASMod
 
         static void AddOffsetValue(ref TextInput textbox, float offset)
         {
-            if (!(PlayerController.main.player.Value is Rocket rocket))
+            if (!(PlayerController.main.player.Value is Rocket))
                 return;
             (float value, bool flag) currentValue = StringToFloat(textbox.Text);
             textbox.Text = NormaliseAngle(!currentValue.flag ? currentValue.value + offset : currentValue.value).ToString("0.00");
