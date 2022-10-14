@@ -34,14 +34,20 @@ namespace SmartSASMod
             [HarmonyPostfix]
             static float Postfix(float result, Rocket __instance)
             {
-                GUI.rotManager.rocket.rb2d.angularDrag = 0.05f;
+                if (GUI.rotManager.rocket != null)
+                {
+                    GUI.rotManager.rocket.rb2d.angularDrag = 0.05f;
+                }
                 if (__instance != PlayerController.main.player.Value as Rocket)
                 {
                     return result;
                 }
                 else if (GUI.rotManager.disableSAS)
                 {
-                    GUI.rotManager.rocket.rb2d.angularDrag = 0;
+                    if (GUI.rotManager.rocket != null)
+                    {
+                        GUI.rotManager.rocket.rb2d.angularDrag = 0f;
+                    }
                     return 0f;
                 }
                 else if (!GUI.rotManager.useDefault)
@@ -107,7 +113,15 @@ namespace SmartSASMod
         static void FollowDirection(DirectionMode direction)
         {
             if (!(PlayerController.main.player.Value is Rocket rocket))
+            {
+                MsgDrawer.main.Log("You aren't controlling a rocket...");
                 return;
+            }
+            else if ((PlayerController.main.player.Value as Rocket).partHolder.GetModules<ControlModule>().Any((ControlModule module) => module.hasControl.Value))
+            {
+                MsgDrawer.main.Log("Rocket is uncontrollable, cannot change SAS");
+                return;  
+            }
             if (rotManager.currentMode == direction)
             {
                 buttons[direction].gameObject.GetComponent<ButtonPC>().SetSelected(false);
