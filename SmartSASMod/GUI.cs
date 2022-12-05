@@ -16,19 +16,27 @@ namespace SmartSASMod
         static readonly int MainWindowID = Builder.GetRandomID();
         public static TextInput angleInput;
         public static Dictionary<DirectionMode, SFS.UI.ModGUI.Button> buttons;
+        public enum DirectionMode
+        {
+            Prograde,
+            Target,
+            Surface,
+            None,
+            Default
+        }
 
         public static void SpawnGUI()
         {
             holder = Builder.CreateHolder(Builder.SceneToAttach.CurrentScene, "SASMod GUI Holder");
             rotManager = holder.AddComponent<RotationManager>();
 
-            Vector2Int pos = Config.data.windowPosition;
+            Vector2Int pos = SettingsManager.settings.windowPosition;
             Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 290, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
 
             window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () => 
             {
-                Config.data.windowPosition = Vector2Int.RoundToInt(window.Position);
-                Config.Save();
+                SettingsManager.settings.windowPosition = Vector2Int.RoundToInt(window.Position);
+                SettingsManager.Save();
             };
 
             buttons = new Dictionary<DirectionMode, SFS.UI.ModGUI.Button>
@@ -48,19 +56,9 @@ namespace SmartSASMod
             Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(ref angleInput, 10), ">>");
             Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(ref angleInput, 1), ">");
 
-            window.gameObject.transform.localScale = new Vector3(Config.data.windowScale, Config.data.windowScale, 1f);
+            window.gameObject.transform.localScale = new Vector3(SettingsManager.settings.windowScale, SettingsManager.settings.windowScale, 1f);
         }
-
-        public enum DirectionMode
-        {
-            Prograde,
-            Target,
-            Surface,
-            None,
-            Default
-        }
-
-        static void FollowDirection(DirectionMode direction)
+        public static void FollowDirection(DirectionMode direction)
         {
             if (!(PlayerController.main.player.Value is Rocket))
             {
@@ -93,19 +91,25 @@ namespace SmartSASMod
 
         }
 
-        static void AddOffsetValue(ref TextInput textbox, float offset)
+        public static void AddOffsetValue(ref TextInput textbox, float offset)
         {
             if (!(PlayerController.main.player.Value is Rocket))
                 return;
             (float value, bool flag) = StringToFloat(textbox.Text);
             textbox.Text = NormaliseAngle(!flag ? value + offset : value).ToString("0.00");
         }
+        public static void SetOffsetValue(ref TextInput textbox, float offset)
+        {
+            if (!(PlayerController.main.player.Value is Rocket))
+                return;
+            textbox.Text = NormaliseAngle(offset).ToString("0.00");
+        }
 
         public static (float value, bool flag) StringToFloat(string input)
         {
             try
             {
-                float output = float.Parse(input, NumberStyles.Any, CultureInfo.InvariantCulture);
+                float output = float.Parse(input, NumberStyles.Float, CultureInfo.InvariantCulture);
                 return (output, false);
             }
             catch
@@ -113,7 +117,6 @@ namespace SmartSASMod
                 return (0f, true);
             }
         }
-
         public static float NormaliseAngle(float input)
         {
             while (!(input < 360 && input >= 0))
@@ -134,7 +137,7 @@ namespace SmartSASMod
         {
             if (StringToFloat(input).flag)
             {
-                angleInput.Text = 0f.ToString("0.00");
+                angleInput.Text = 0f.ToString("0");
             }
         }
 
