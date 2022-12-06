@@ -120,7 +120,7 @@ namespace SmartSASMod
 
         public static class KeyFunctions
         {
-            public static void ToggleButton(GUI.DirectionMode direction)
+            public static void ToggleButton(DirectionMode direction)
             {
                 GUI.FollowDirection(direction);
             }
@@ -135,10 +135,10 @@ namespace SmartSASMod
 
             public static void AssignFunctions()
             {
-                AddOnKeyDown_World(keybindsManager.Key_Prograde, () => ToggleButton(GUI.DirectionMode.Prograde));
-                AddOnKeyDown_World(keybindsManager.Key_Target, () => ToggleButton(GUI.DirectionMode.Target));
-                AddOnKeyDown_World(keybindsManager.Key_Surface, () => ToggleButton(GUI.DirectionMode.Surface));
-                AddOnKeyDown_World(keybindsManager.Key_None, () => ToggleButton(GUI.DirectionMode.None));
+                AddOnKeyDown_World(keybindsManager.Key_Prograde, () => ToggleButton(DirectionMode.Prograde));
+                AddOnKeyDown_World(keybindsManager.Key_Target, () => ToggleButton(DirectionMode.Target));
+                AddOnKeyDown_World(keybindsManager.Key_Surface, () => ToggleButton(DirectionMode.Surface));
+                AddOnKeyDown_World(keybindsManager.Key_None, () => ToggleButton(DirectionMode.None));
 
                 AddOnKeyDown_World(keybindsManager.Key_Offset_Negative, () => AddOffset(-10));
                 AddOnKeyDown_World(keybindsManager.Key_Offset_Positive, () => AddOffset(10));

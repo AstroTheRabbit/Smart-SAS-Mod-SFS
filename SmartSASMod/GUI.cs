@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using SFS.Parts.Modules;
+using System;
 using SFS.UI;
 using SFS.UI.ModGUI;
 using SFS.World;
@@ -9,26 +8,41 @@ using UnityEngine;
 
 namespace SmartSASMod
 {
+    public enum DirectionMode
+    {
+        Prograde,
+        Target,
+        Surface,
+        None,
+        Default
+    }
     public static class GUI
     {
         static GameObject holder;
-        public static RotationManager rotManager;
         static readonly int MainWindowID = Builder.GetRandomID();
         public static TextInput angleInput;
         public static Dictionary<DirectionMode, SFS.UI.ModGUI.Button> buttons;
-        public enum DirectionMode
+
+        class GUIUpdater : MonoBehaviour
         {
-            Prograde,
-            Target,
-            Surface,
-            None,
-            Default
+            private void Update()
+            {
+                try
+                {
+                    SASComponent sas = (PlayerController.main.player.Value as Rocket).GetOrAddComponent<SASComponent>();
+                    foreach (var button in buttons)
+                    {
+                        button.Value.gameObject.GetComponent<ButtonPC>().SetSelected(button.Key == sas.currentDirection);
+                    }
+                }
+                catch (NullReferenceException) {}
+            }
         }
 
         public static void SpawnGUI()
         {
             holder = Builder.CreateHolder(Builder.SceneToAttach.CurrentScene, "SASMod GUI Holder");
-            rotManager = holder.AddComponent<RotationManager>();
+            holder.AddComponent<GUIUpdater>();
 
             Vector2Int pos = SettingsManager.settings.windowPosition;
             Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 290, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
@@ -60,35 +74,25 @@ namespace SmartSASMod
         }
         public static void FollowDirection(DirectionMode direction)
         {
-            if (!(PlayerController.main.player.Value is Rocket))
+            var rocket = PlayerController.main.player.Value;
+            if (!(rocket is Rocket))
             {
                 MsgDrawer.main.Log("You aren't controlling a rocket...");
                 return;
             }
+            else
+            {
+                rocket = rocket as Rocket;
+            }
 
-            if (!(PlayerController.main.player.Value as Rocket).hasControl.Value)
+            if (!rocket.hasControl.Value)
             {
                 MsgDrawer.main.Log("Rocket is uncontrollable, cannot change SAS");
                 return;
             }
 
-            if (rotManager.currentMode == direction)
-            {
-                buttons[direction].gameObject.GetComponent<ButtonPC>().SetSelected(false);
-                rotManager.currentMode = DirectionMode.Default;
-            }
-            else if (rotManager.currentMode != DirectionMode.Default)
-            {
-                buttons[rotManager.currentMode].gameObject.GetComponent<ButtonPC>().SetSelected(false);
-                buttons[direction].gameObject.GetComponent<ButtonPC>().SetSelected(true);
-                rotManager.currentMode = direction;
-            }
-            else
-            {
-                buttons[direction].gameObject.GetComponent<ButtonPC>().SetSelected(true);
-                rotManager.currentMode = direction;
-            }
-
+            SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
+            sas.currentDirection = sas.currentDirection != direction ? direction : DirectionMode.Default;
         }
 
         public static void AddOffsetValue(ref TextInput textbox, float offset)
@@ -107,6 +111,8 @@ namespace SmartSASMod
 
         public static (float value, bool flag) StringToFloat(string input)
         {
+            if (input == "NaN" || input ==  "Infinity" || input ==  "-Infinity")
+                return (0f, true);
             try
             {
                 float output = float.Parse(input, NumberStyles.Float, CultureInfo.InvariantCulture);
@@ -117,51 +123,12 @@ namespace SmartSASMod
                 return (0f, true);
             }
         }
-        public static float NormaliseAngle(float input)
-        {
-            while (!(input < 360 && input >= 0))
-            {
-                if (input < 0)
-                {
-                    input += 360;
-                }
-                else if (input >= 360)
-                {
-                    input -= 360;
-                }
-            }
-            return input;
-        }
-
+        public static float NormaliseAngle(float input) => input % 360;
         static void VerifyAngleInput(string input)
         {
             if (StringToFloat(input).flag)
-            {
-                angleInput.Text = 0f.ToString("0");
-            }
+                angleInput.Text = 0f.ToString("0.00");
         }
-
-        public static float TorqueDirection(float deltaAngle, Rocket rocket)
-        {
-            float angularVelocity = rocket.rb2d.angularVelocity;
-            float torque = (from x in rocket.partHolder.GetModules<TorqueModule>()
-                            where x.enabled.Local || x.enabled.Value
-                            select x).Sum((TorqueModule torqueModule) => torqueModule.torque.Value);
-            float maxPossibleChangePerPhysicsStep = torque * 57.29578f / rocket.rb2d.mass * Time.fixedDeltaTime;
-
-            if (!WorldTime.main.realtimePhysics.Value)
-                return 0;
-
-            if (Mathf.Abs(deltaAngle) <= 0.1f)
-                return -Mathf.Sign(angularVelocity);
-
-            if (rocket.location.velocity.Value.magnitude <= 3 && rotManager.currentMode == DirectionMode.Prograde)
-                return Mathf.Clamp(angularVelocity / maxPossibleChangePerPhysicsStep, -1f, 1f);
-
-            if (Mathf.Abs(deltaAngle) > 5)
-                return -Mathf.Sign(-angularVelocity - (Mathf.Sign(deltaAngle) * (25 - (25 * 15 / (Mathf.Pow(Mathf.Abs(deltaAngle), 1.5f) + 15)))));
-
-            return -Mathf.Sign(-angularVelocity - (Mathf.Sign(deltaAngle) * (25 - (25 * 15 / (Mathf.Pow(Mathf.Abs(deltaAngle), 1.5f) + 15))))) / 2;
-        }
+        public static float GetAngleOffsetFloat() => StringToFloat(angleInput.Text).value;
     }
 }
