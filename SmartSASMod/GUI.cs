@@ -55,58 +55,83 @@ namespace SmartSASMod
 
             buttons = new Dictionary<DirectionMode, SFS.UI.ModGUI.Button>
             {
-                {DirectionMode.Prograde, Builder.CreateButton(window, 160, 50, -85, -25, () => FollowDirection(DirectionMode.Prograde), "Prograde")},
-                {DirectionMode.Target, Builder.CreateButton(window, 160, 50, 85, -25, () => FollowDirection(DirectionMode.Target), "Target")},
-                {DirectionMode.Surface, Builder.CreateButton(window, 160, 50, -85, -80, () => FollowDirection(DirectionMode.Surface), "Surface")},
-                {DirectionMode.None, Builder.CreateButton(window, 160, 50, 85, -80, () => FollowDirection(DirectionMode.None), "None")}
+                {DirectionMode.Prograde, Builder.CreateButton(window, 160, 50, -85, -25, () => ToggleDirection(DirectionMode.Prograde), "Prograde")},
+                {DirectionMode.Target, Builder.CreateButton(window, 160, 50, 85, -25, () => ToggleDirection(DirectionMode.Target), "Target")},
+                {DirectionMode.Surface, Builder.CreateButton(window, 160, 50, -85, -80, () => ToggleDirection(DirectionMode.Surface), "Surface")},
+                {DirectionMode.None, Builder.CreateButton(window, 160, 50, 85, -80, () => ToggleDirection(DirectionMode.None), "None")}
             };
 
             Builder.CreateLabel(window, 180, 50, 0, -145, "Angle Offset");
             angleInput = Builder.CreateTextInput(window, 110, 50, 0, -200, "0.00");
             angleInput.field.onEndEdit.AddListener(VerifyAngleInput);
 
-            Builder.CreateButton(window, 50, 50, -140, -200, () => AddOffsetValue(ref angleInput, -10), "<<");
-            Builder.CreateButton(window, 50, 50, -85, -200, () => AddOffsetValue(ref angleInput, -1), "<");
-            Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(ref angleInput, 10), ">>");
-            Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(ref angleInput, 1), ">");
+            Builder.CreateButton(window, 50, 50, -140, -200, () => AddOffsetValue(angleInput, -10), "<<");
+            Builder.CreateButton(window, 50, 50, -85, -200, () => AddOffsetValue(angleInput, -1), "<");
+            Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(angleInput, 10), ">>");
+            Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(angleInput, 1), ">");
 
             window.gameObject.transform.localScale = new Vector3(SettingsManager.settings.windowScale, SettingsManager.settings.windowScale, 1f);
         }
-        public static void FollowDirection(DirectionMode direction)
+
+        public static void CheckRocketControl(Action<Rocket> onControl)
         {
-            var rocket = PlayerController.main.player.Value;
-            if (!(rocket is Rocket))
+            if (PlayerController.main.player.Value is Rocket rocket)
             {
-                MsgDrawer.main.Log("You aren't controlling a rocket...");
-                return;
+                if (rocket.hasControl.Value)
+                {
+                    onControl(rocket);
+                }
+                else
+                {
+                    MsgDrawer.main.Log("Rocket is uncontrollable, cannot change SAS");
+                }
             }
             else
             {
-                rocket = rocket as Rocket;
+                MsgDrawer.main.Log("You aren't controlling a rocket...");
             }
-
-            if (!rocket.hasControl.Value)
-            {
-                MsgDrawer.main.Log("Rocket is uncontrollable, cannot change SAS");
-                return;
-            }
-
-            SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
-            sas.currentDirection = sas.currentDirection != direction ? direction : DirectionMode.Default;
         }
 
-        public static void AddOffsetValue(ref TextInput textbox, float offset)
+        public static void SetDirection(DirectionMode direction)
         {
-            if (!(PlayerController.main.player.Value is Rocket))
-                return;
-            (float value, bool flag) = StringToFloat(textbox.Text);
-            textbox.Text = NormaliseAngle(!flag ? value + offset : value).ToString("0.00");
+            CheckRocketControl(
+                (Rocket rocket) =>
+                {
+                    SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
+                    sas.currentDirection = direction;
+                }
+            );
         }
-        public static void SetOffsetValue(ref TextInput textbox, float offset)
+
+        public static void ToggleDirection(DirectionMode direction)
         {
-            if (!(PlayerController.main.player.Value is Rocket))
-                return;
-            textbox.Text = NormaliseAngle(offset).ToString("0.00");
+            CheckRocketControl(
+                (Rocket rocket) =>
+                {
+                    SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
+                    sas.currentDirection = sas.currentDirection != direction ? direction : DirectionMode.Default;
+                }
+            );
+        }
+
+        public static void AddOffsetValue(TextInput textbox, float offset)
+        {
+            CheckRocketControl(
+                (Rocket rocket) =>
+                {
+                    (float value, bool flag) = StringToFloat(textbox.Text);
+                    textbox.Text = NormaliseAngle(!flag ? value + offset : value).ToString("0.00");
+                }
+            );
+        }
+
+        public static void SetOffsetValue(TextInput textbox, float offset)
+        {
+            CheckRocketControl((Rocket rocket) =>
+                {
+                    textbox.Text = NormaliseAngle(offset).ToString("0.00");
+                }
+            );
         }
 
         public static (float value, bool flag) StringToFloat(string input)
@@ -123,7 +148,9 @@ namespace SmartSASMod
                 return (0f, true);
             }
         }
+
         public static float NormaliseAngle(float input) => input % 360;
+
         static void VerifyAngleInput(string input)
         {
             if (StringToFloat(input).flag)

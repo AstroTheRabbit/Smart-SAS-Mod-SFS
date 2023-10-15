@@ -13,6 +13,8 @@ namespace SmartSASMod
     {
         public float windowScale = 1f;
         public Vector2Int windowPosition = new Vector2Int( -850, -500 );
+        public bool useANAISTargeting = true;
+        // public bool keepSASSettingsOnDetach = false;
     }
 
     public static class SettingsManager
@@ -29,7 +31,7 @@ namespace SmartSASMod
             {
                 if (!JsonWrapper.TryLoadJson(oldPath, out oldSettings))
                 {
-                    Debug.Log("Smart SAS: Converting old Config.txt to Settings.txt.");
+                    Debug.Log("Smart SAS: Converting old Config.txt to settings.txt.");
                 }
                 oldPath.DeleteFile();
             }
@@ -59,10 +61,15 @@ namespace SmartSASMod
         public KeybindingsPC.Key Key_Target = KeyCode.None;
         public KeybindingsPC.Key Key_Surface = KeyCode.None;
         public KeybindingsPC.Key Key_None = KeyCode.None;
+
+        public KeybindingsPC.Key Key_Retrograde = KeyCode.None;
+        public KeybindingsPC.Key Key_Default = KeyCode.None;
+
         public KeybindingsPC.Key Key_Offset_Negative = KeyCode.None;
         public KeybindingsPC.Key Key_Offset_Positive = KeyCode.None;
         public KeybindingsPC.Key Key_Offset_Negative_Small = KeyCode.None;
         public KeybindingsPC.Key Key_Offset_Positive_Small = KeyCode.None;
+
         public KeybindingsPC.Key Key_Reset_Offset = KeyCode.None;
         public KeybindingsPC.Key Key_Flip_Offset = KeyCode.None;
 
@@ -83,34 +90,38 @@ namespace SmartSASMod
 			CreateUI_Keybinding(Key_None, defaults.Key_None, "Toggle none");
             CreateUI_Space();
 
+			CreateUI_Keybinding(Key_Retrograde, defaults.Key_Retrograde, "Set retrograde");
+			CreateUI_Keybinding(Key_Default, defaults.Key_Default, "Set default");
+            CreateUI_Space();
+
             CreateUI_Keybinding(
-                new KeybindingsPC.Key[] {
+                new [] {
                     Key_Offset_Negative,
                     Key_Offset_Positive
                 },
-                new KeybindingsPC.Key[] {
+                new [] {
                     defaults.Key_Offset_Negative,
                     defaults.Key_Offset_Positive
                 },
                 "Change offset by ±10"
             );
             CreateUI_Keybinding(
-                new KeybindingsPC.Key[] {
+                new [] {
                     Key_Offset_Negative_Small,
                     Key_Offset_Positive_Small
                 },
-                new KeybindingsPC.Key[] {
+                new [] {
                     defaults.Key_Offset_Negative_Small,
                     defaults.Key_Offset_Positive_Small
                 },
                 "Change offset by ±1"
             );
             CreateUI_Keybinding(
-                new KeybindingsPC.Key[] {
+                new [] {
                     Key_Reset_Offset,
                     Key_Flip_Offset
                 },
-                new KeybindingsPC.Key[] {
+                new [] {
                     defaults.Key_Reset_Offset,
                     defaults.Key_Flip_Offset
                 },
@@ -120,33 +131,28 @@ namespace SmartSASMod
 
         public static class KeyFunctions
         {
-            public static void ToggleButton(DirectionMode direction)
-            {
-                GUI.FollowDirection(direction);
-            }
-            public static void AddOffset(float offset)
-            {
-                GUI.AddOffsetValue(ref GUI.angleInput, offset);
-            }
-            public static void SetOffset(float offset)
-            {
-                GUI.SetOffsetValue(ref GUI.angleInput, offset);
-            }
 
             public static void AssignFunctions()
             {
-                AddOnKeyDown_World(keybindsManager.Key_Prograde, () => ToggleButton(DirectionMode.Prograde));
-                AddOnKeyDown_World(keybindsManager.Key_Target, () => ToggleButton(DirectionMode.Target));
-                AddOnKeyDown_World(keybindsManager.Key_Surface, () => ToggleButton(DirectionMode.Surface));
-                AddOnKeyDown_World(keybindsManager.Key_None, () => ToggleButton(DirectionMode.None));
+                AddOnKeyDown_World(keybindsManager.Key_Prograde, () => GUI.ToggleDirection(DirectionMode.Prograde));
+                AddOnKeyDown_World(keybindsManager.Key_Target, () => GUI.ToggleDirection(DirectionMode.Target));
+                AddOnKeyDown_World(keybindsManager.Key_Surface, () => GUI.ToggleDirection(DirectionMode.Surface));
+                AddOnKeyDown_World(keybindsManager.Key_None, () => GUI.ToggleDirection(DirectionMode.None));
+                
+                AddOnKeyDown_World(keybindsManager.Key_Retrograde, () =>
+                {
+                    GUI.SetDirection(DirectionMode.Prograde);
+                    GUI.SetOffsetValue(GUI.angleInput, 180);
+                });
+                AddOnKeyDown_World(keybindsManager.Key_Default, () => GUI.SetDirection(DirectionMode.Default));
 
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative, () => AddOffset(-10));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive, () => AddOffset(10));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative_Small, () => AddOffset(-1));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive_Small, () => AddOffset(1));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative, () => GUI.AddOffsetValue(GUI.angleInput, -10));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive, () => GUI.AddOffsetValue(GUI.angleInput, 10));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative_Small, () => GUI.AddOffsetValue(GUI.angleInput, -1));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive_Small, () => GUI.AddOffsetValue(GUI.angleInput, 1));
 
-                AddOnKeyDown_World(keybindsManager.Key_Reset_Offset, () => SetOffset(0));
-                AddOnKeyDown_World(keybindsManager.Key_Flip_Offset, () => AddOffset(180));
+                AddOnKeyDown_World(keybindsManager.Key_Reset_Offset, () => GUI.SetOffsetValue(GUI.angleInput, 0));
+                AddOnKeyDown_World(keybindsManager.Key_Flip_Offset, () => GUI.AddOffsetValue(GUI.angleInput, 180));
             }
         }
     }
