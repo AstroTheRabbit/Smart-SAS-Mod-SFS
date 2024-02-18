@@ -13,9 +13,9 @@ namespace SmartSASMod
     [HarmonyPatch(typeof(Rocket), "GetStopRotationTurnAxis")]
     class CustomSAS
     {
-        private static float _lastAngularVelocity=0;
-        private static float _lastDeltaAngle=0;
-        private static bool _lastValuesKnown=false;
+        //~ private static float _lastAngularVelocity=0;
+        //~ private static float _lastDeltaAngle=0;
+        //~ private static bool _lastValuesKnown=false;
 
         static float Postfix(float result, Rocket __instance)
         {
@@ -40,20 +40,20 @@ namespace SmartSASMod
                     deltaAngle += 360;
                 float o = -Mathf.Sign(-angularVelocity - (Mathf.Sign(deltaAngle) * (25 - (25 * 15 / (Mathf.Pow(Mathf.Abs(deltaAngle), 1.5f) + 15)))));
 
-                if (_lastValuesKnown && Mathf.Abs(deltaAngle)>1 && Mathf.Abs(angularVelocity)>1e-3 && Mathf.Abs(deltaAngle-_lastDeltaAngle)>1e-3)
-                {
-                    double estimatedTimeInterval=Math.Abs((deltaAngle-_lastDeltaAngle)/angularVelocity);
-                    double angularAcceleration=Math.Abs(angularVelocity-_lastAngularVelocity)/estimatedTimeInterval;
+                //~ if (_lastValuesKnown && Mathf.Abs(deltaAngle)>1 && Mathf.Abs(angularVelocity)>1e-3 && Mathf.Abs(deltaAngle-_lastDeltaAngle)>1e-3)
+                //~ {
+                    //~ double estimatedTimeInterval=Math.Abs((deltaAngle-_lastDeltaAngle)/angularVelocity);
+                    //~ double angularAcceleration=Math.Abs(angularVelocity-_lastAngularVelocity)/estimatedTimeInterval;
 
-                    if (angularAcceleration>1e-3 && Math.Abs(deltaAngle)<2*angularVelocity*angularVelocity/angularAcceleration)
-                    {
-                        // too fast slow down (allowing for drag?)
-                        o=-o/2;
-                    }
-                }
-                _lastAngularVelocity=angularVelocity;
-                _lastDeltaAngle=deltaAngle;
-                _lastValuesKnown=true;
+                    //~ if (angularAcceleration>1e-3 && Math.Abs(deltaAngle)<2*angularVelocity*angularVelocity/angularAcceleration)
+                    //~ {
+                        //~ // too fast slow down (allowing for drag?)
+                        //~ o=-0;
+                    //~ }
+                //~ }
+                //~ _lastAngularVelocity=angularVelocity;
+                //~ _lastDeltaAngle=deltaAngle;
+                //~ _lastValuesKnown=true;
 
                 return Mathf.Abs(deltaAngle) > 5 ? o : Mathf.Abs(deltaAngle) > 0.05f ? o / 2 : result;
 
