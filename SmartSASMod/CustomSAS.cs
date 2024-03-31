@@ -13,9 +13,21 @@ namespace SmartSASMod
     [HarmonyPatch(typeof(Rocket), "GetStopRotationTurnAxis")]
     class CustomSAS
     {
-        //~ private static float _lastAngularVelocity=0;
-        //~ private static float _lastDeltaAngle=0;
-        //~ private static bool _lastValuesKnown=false;
+        private static bool _isSlowing=false;
+        private static int _ticksToReCheck=0;
+        private static float GetTorque(Rocket rocket)
+        {
+            float num = 0f;
+             SFS.Parts.Modules.TorqueModule[] modules = rocket.partHolder.GetModules< SFS.Parts.Modules.TorqueModule>();
+            foreach ( SFS.Parts.Modules.TorqueModule torqueModule in modules)
+            {
+                if (torqueModule.enabled.Local || torqueModule.enabled.Value)
+                {
+                    num += torqueModule.torque.Value;
+                }
+            }
+            return num;
+        }
 
         static float Postfix(float result, Rocket __instance)
         {
@@ -32,6 +44,9 @@ namespace SmartSASMod
             float TargetRotationToTorque(float rot)
             {
                 float deltaAngle = GUI.NormaliseAngle(currentRotation - (rot - angleOffset));
+                float torque=GetTorque(__instance);
+                float mass =__instance.mass.GetMass();
+
                 if (deltaAngle > 180)
                 {
                     deltaAngle -= 360;
@@ -40,20 +55,31 @@ namespace SmartSASMod
                     deltaAngle += 360;
                 float o = -Mathf.Sign(-angularVelocity - (Mathf.Sign(deltaAngle) * (25 - (25 * 15 / (Mathf.Pow(Mathf.Abs(deltaAngle), 1.5f) + 15)))));
 
-                //~ if (_lastValuesKnown && Mathf.Abs(deltaAngle)>1 && Mathf.Abs(angularVelocity)>1e-3 && Mathf.Abs(deltaAngle-_lastDeltaAngle)>1e-3)
-                //~ {
-                    //~ double estimatedTimeInterval=Math.Abs((deltaAngle-_lastDeltaAngle)/angularVelocity);
-                    //~ double angularAcceleration=Math.Abs(angularVelocity-_lastAngularVelocity)/estimatedTimeInterval;
+                if (
+                        torque>1e-3 && mass>1e-3
+                        && Mathf.Sign(deltaAngle)==-Mathf.Sign(angularVelocity)
+                        && Mathf.Abs(deltaAngle)<angularVelocity*angularVelocity*mass/(torque*10)
+                   )
+                {
+                    // too fast slow down (allowing for drag?)
+                    if (!_isSlowing)
+                    {
+                        _isSlowing=true;
+                        _ticksToReCheck=20;
+                    }
+                }
 
-                    //~ if (angularAcceleration>1e-3 && Math.Abs(deltaAngle)<2*angularVelocity*angularVelocity/angularAcceleration)
-                    //~ {
-                        //~ // too fast slow down (allowing for drag?)
-                        //~ o=-0;
-                    //~ }
-                //~ }
-                //~ _lastAngularVelocity=angularVelocity;
-                //~ _lastDeltaAngle=deltaAngle;
-                //~ _lastValuesKnown=true;
+                if (_isSlowing)
+                {
+                   if (--_ticksToReCheck>0)
+                    {
+                        o=0;
+                    }
+                    else
+                    {
+                        _isSlowing=false;
+                    }
+                }
 
                 return Mathf.Abs(deltaAngle) > 5 ? o : Mathf.Abs(deltaAngle) > 0.05f ? o / 2 : result;
 
