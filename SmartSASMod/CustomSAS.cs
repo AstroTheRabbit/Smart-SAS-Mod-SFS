@@ -46,6 +46,7 @@ namespace SmartSASMod
                 float deltaAngle = GUI.NormaliseAngle(currentRotation - (rot - angleOffset));
                 float torque=GetTorque(__instance);
                 float mass =__instance.mass.GetMass();
+                //~ bool autoSlowing = true; // true to enable test autoslowing
 
                 if (deltaAngle > 180)
                 {
@@ -55,29 +56,32 @@ namespace SmartSASMod
                     deltaAngle += 360;
                 float o = -Mathf.Sign(-angularVelocity - (Mathf.Sign(deltaAngle) * (25 - (25 * 15 / (Mathf.Pow(Mathf.Abs(deltaAngle), 1.5f) + 15)))));
 
-                if (
-                        torque>1e-3 && mass>1e-3
-                        && Mathf.Sign(deltaAngle)==-Mathf.Sign(angularVelocity)
-                        && Mathf.Abs(deltaAngle)<angularVelocity*angularVelocity*mass/(torque*10)
-                   )
+                if (GUI.autoSlowing>0)
                 {
-                    // too fast slow down (allowing for drag?)
-                    if (!_isSlowing)
+                    if (
+                            torque>1e-3 && mass>1e-3
+                            && Mathf.Sign(deltaAngle)==-Mathf.Sign(angularVelocity)
+                            && Mathf.Abs(deltaAngle)<angularVelocity*angularVelocity*mass*0.01f*Mathf.Pow(10.0f,GUI.autoSlowing/5.0f)/torque
+                       )
                     {
-                        _isSlowing=true;
-                        _ticksToReCheck=20;
+                        // too fast slow down (allowing for drag?)
+                        if (!_isSlowing)
+                        {
+                            _isSlowing=true;
+                            _ticksToReCheck=20;
+                        }
                     }
-                }
 
-                if (_isSlowing)
-                {
-                   if (--_ticksToReCheck>0)
+                    if (_isSlowing)
                     {
-                        o=0;
-                    }
-                    else
-                    {
-                        _isSlowing=false;
+                       if (--_ticksToReCheck>0)
+                        {
+                            o=0;
+                        }
+                        else
+                        {
+                            _isSlowing=false;
+                        }
                     }
                 }
 

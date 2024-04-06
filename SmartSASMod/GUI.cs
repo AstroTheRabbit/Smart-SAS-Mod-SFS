@@ -22,6 +22,8 @@ namespace SmartSASMod
         static readonly int MainWindowID = Builder.GetRandomID();
         public static TextInput angleInput;
         public static Dictionary<DirectionMode, SFS.UI.ModGUI.Button> buttons;
+        public static int autoSlowing=0; // amount of auto slowing; 0 off, 10 max
+        private static Label autoSlowingLabel;
 
         class GUIUpdater : MonoBehaviour
         {
@@ -45,9 +47,9 @@ namespace SmartSASMod
             holder.AddComponent<GUIUpdater>();
 
             Vector2Int pos = SettingsManager.settings.windowPosition;
-            Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 290, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
+            Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 350, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
 
-            window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () => 
+            window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () =>
             {
                 SettingsManager.settings.windowPosition = Vector2Int.RoundToInt(window.Position);
                 SettingsManager.Save();
@@ -69,8 +71,30 @@ namespace SmartSASMod
             Builder.CreateButton(window, 50, 50, -85, -200, () => AddOffsetValue(angleInput, -1), "<");
             Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(angleInput, 10), ">>");
             Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(angleInput, 1), ">");
+            Builder.CreateLabel(window,150,30, 0, -260,"Auto Brake" );
+            Builder.CreateButton(window, 30, 30, 82, -260, ReduceAutoSlowing , "<");
+            autoSlowingLabel  =Builder.CreateLabel(window, 110, 30, 110, -260, "0");
+            Builder.CreateButton(window, 30, 30, 137, -260, IncreaseAutoSlowing , ">");
 
             window.gameObject.transform.localScale = new Vector3(SettingsManager.settings.windowScale, SettingsManager.settings.windowScale, 1f);
+        }
+
+        private static void ReduceAutoSlowing()
+        {
+            if (autoSlowing>0)
+            {
+                autoSlowing--;
+                autoSlowingLabel.Text =autoSlowing.ToString() ;
+            }
+        }
+
+        private static void IncreaseAutoSlowing()
+        {
+            if (autoSlowing<10)
+            {
+                autoSlowing++;
+                autoSlowingLabel.Text =autoSlowing.ToString() ;
+            }
         }
 
         public static void CheckRocketControl(Action<Rocket> onControl)
