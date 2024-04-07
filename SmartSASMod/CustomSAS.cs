@@ -46,7 +46,6 @@ namespace SmartSASMod
                 float deltaAngle = GUI.NormaliseAngle(currentRotation - (rot - angleOffset));
                 float torque=GetTorque(__instance);
                 float mass =__instance.mass.GetMass();
-                //~ bool autoSlowing = true; // true to enable test autoslowing
 
                 if (deltaAngle > 180)
                 {
@@ -56,12 +55,12 @@ namespace SmartSASMod
                     deltaAngle += 360;
                 float o = -Mathf.Sign(-angularVelocity - (Mathf.Sign(deltaAngle) * (25 - (25 * 15 / (Mathf.Pow(Mathf.Abs(deltaAngle), 1.5f) + 15)))));
 
-                if (GUI.autoSlowing>0)
+                if (GUI.turnRateLimiter>0)
                 {
                     if (
                             torque>1e-3 && mass>1e-3
                             && Mathf.Sign(deltaAngle)==-Mathf.Sign(angularVelocity)
-                            && Mathf.Abs(deltaAngle)<angularVelocity*angularVelocity*mass*0.01f*Mathf.Pow(10.0f,GUI.autoSlowing/5.0f)/torque
+                            && Mathf.Abs(deltaAngle)<angularVelocity*angularVelocity*mass*0.01f*Mathf.Pow(10.0f,GUI.turnRateLimiter/5.0f)/torque
                        )
                     {
                         // too fast slow down (allowing for drag?)
