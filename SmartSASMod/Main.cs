@@ -14,10 +14,10 @@ namespace SmartSASMod
     {
         public override string ModNameID => "smartsasmod";
         public override string DisplayName => "Smart SAS";
-        public override string Author => "pixelgaming579,darthan184";
+        public override string Author => "pixelgaming579";
         public override string MinimumGameVersionNecessary => "1.5.10.2";
         public override string ModVersion => "v1.5";
-        public override string Description => "Adds a variety of control options for the stability assist system (SAS). (darthan184 test version)";
+        public override string Description => "Adds a variety of control options for the stability assist system (SAS).";
 
         public override Dictionary<string, string> Dependencies { get; } = new Dictionary<string, string> { { "UITools", "1.1.1" } };
         public Dictionary<string, FilePath> UpdatableFiles => new Dictionary<string, FilePath>() { { "https://github.com/pixelgaming579/Smart-SAS-Mod-SFS/releases/latest/download/SmartSASMod.dll", new FolderPath(ModFolder).ExtendToFile("SmartSASMod.dll") } };
@@ -44,7 +44,7 @@ namespace SmartSASMod
                     Assembly ANAISAssembly = Loader.main.GetLoadedMods().First((Mod mod) => mod.ModNameID == "ANAIS").GetType().Assembly;
                     Type velocityArrowPatch = ANAISAssembly.GetTypes().First((Type type) => type.Name == "VelocityArrowDrawer_OnLocationChange_Patch");
                     ANAISTraverse = Traverse.Create(velocityArrowPatch);
-                }
+                } 
                 catch
                 {
                     Debug.Log("Smart SAS: ANAIS is not installed/active.");
