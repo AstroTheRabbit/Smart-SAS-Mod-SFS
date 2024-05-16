@@ -1,12 +1,10 @@
-using UnityEngine;
 using System;
-using HarmonyLib;
-using SFS.World;
-using SFS.UI;
-using SFS.World.Maps;
-using System.Linq;
 using System.Reflection;
-using ModLoader;
+using UnityEngine;
+using HarmonyLib;
+using SFS.UI;
+using SFS.World;
+using SFS.World.Maps;
 
 namespace SmartSASMod
 {
@@ -26,15 +24,30 @@ namespace SmartSASMod
             float angleOffset = GUI.GetAngleOffsetFloat();
             float currentRotation = GUI.NormaliseAngle(__instance.GetRotation());
 
-            float TargetRotationToTorque(float rot)
+            float TargetRotationToTorque(float targetAngle)
             {
-                float deltaAngle = GUI.NormaliseAngle(currentRotation - (rot - angleOffset));
-                if (deltaAngle > 180)
-                    deltaAngle -= 360;
-                float o = -Mathf.Sign(-angularVelocity - (Mathf.Sign(deltaAngle) * (25 - (25 * 15 / (Mathf.Pow(Mathf.Abs(deltaAngle), 1.5f) + 15)))));
-                return Mathf.Abs(deltaAngle) > 5 ? o : Mathf.Abs(deltaAngle) > 0.05f ? o / 2 : result;
+                targetAngle -= angleOffset;
+                float deltaAngle = GUI.NormaliseAngle(targetAngle - currentRotation);
+                // if (Mathf.Abs(deltaAngle) < 0.05)
+                //     return 0f;
 
-                // TODO: Create a PID controller.
+                float torque = (float) typeof(Rocket).GetMethod("GetTorque", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(__instance, null);
+                float mass = __instance.rb2d.mass;
+                if (mass > 200f)
+                    torque /= Mathf.Pow(mass / 200f, 0.35f);
+                
+                float maxAcceleration = torque * Mathf.Rad2Deg / mass;
+                float stoppingTime = Mathf.Abs(angularVelocity / maxAcceleration);
+                float currentTime = Mathf.Abs(deltaAngle / angularVelocity);
+                
+                if (stoppingTime > currentTime)
+                {
+                    return Mathf.Sign(angularVelocity);
+                }
+                else
+                {
+                    return -Mathf.Sign(deltaAngle);
+                }
             }
 
             float targetRotation;

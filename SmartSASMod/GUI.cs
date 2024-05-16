@@ -149,7 +149,7 @@ namespace SmartSASMod
             }
         }
 
-        public static float NormaliseAngle(float input) => input % 360;
+        public static float NormaliseAngle(float input) => ((input + 180f) % 360f) - 180f;
 
         static void VerifyAngleInput(string input)
         {

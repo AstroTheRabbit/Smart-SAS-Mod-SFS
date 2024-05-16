@@ -14,9 +14,9 @@ namespace SmartSASMod
     {
         public override string ModNameID => "smartsasmod";
         public override string DisplayName => "Smart SAS";
-        public override string Author => "pixelgaming579";
+        public override string Author => "Astro The Rabbit";
         public override string MinimumGameVersionNecessary => "1.5.10.2";
-        public override string ModVersion => "v1.5";
+        public override string ModVersion => "v1.6";
         public override string Description => "Adds a variety of control options for the stability assist system (SAS).";
 
         public override Dictionary<string, string> Dependencies { get; } = new Dictionary<string, string> { { "UITools", "1.1.1" } };
