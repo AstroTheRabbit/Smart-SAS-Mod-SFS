@@ -47,7 +47,7 @@ namespace SmartSASMod
             Vector2Int pos = SettingsManager.settings.windowPosition;
             Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 290, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
 
-            window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () => 
+            window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () =>
             {
                 SettingsManager.settings.windowPosition = Vector2Int.RoundToInt(window.Position);
                 SettingsManager.Save();
@@ -149,7 +149,7 @@ namespace SmartSASMod
             }
         }
 
-        public static float NormaliseAngle(float input) => ((input + 180f) % 360f) - 180f;
+        public static float NormaliseAngle(float input) => ((input + 540f) % 360f) - 180f;
 
         static void VerifyAngleInput(string input)
         {
