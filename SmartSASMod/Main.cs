@@ -19,8 +19,8 @@ namespace SmartSASMod
         public override string ModVersion => "v1.6";
         public override string Description => "Adds a variety of control options for the stability assist system (SAS).";
 
-        public override Dictionary<string, string> Dependencies { get; } = new Dictionary<string, string> { { "UITools", "1.1.1" } };
-        public Dictionary<string, FilePath> UpdatableFiles => new Dictionary<string, FilePath>() { { "https://github.com/pixelgaming579/Smart-SAS-Mod-SFS/releases/latest/download/SmartSASMod.dll", new FolderPath(ModFolder).ExtendToFile("SmartSASMod.dll") } };
+        public override Dictionary<string, string> Dependencies { get; } = new Dictionary<string, string> { { "UITools", "1.1.5" } };
+        public Dictionary<string, FilePath> UpdatableFiles => new Dictionary<string, FilePath>() { { "https://github.com/AstroTheRabbit/Smart-SAS-Mod-SFS/releases/latest/download/SmartSASMod.dll", new FolderPath(ModFolder).ExtendToFile("SmartSASMod.dll") } };
 
         public static Mod mod;
         public static FolderPath modFolder;
