@@ -12,7 +12,7 @@ namespace SmartSASMod
 {
     public class Main : Mod
     {
-        public override string ModNameID => "smartsasmod";
+        public override string ModNameID => "smartsas";
         public override string DisplayName => "Smart SAS";
         public override string Author => "Astro The Rabbit";
         public override string MinimumGameVersionNecessary => "1.5.10.2";
