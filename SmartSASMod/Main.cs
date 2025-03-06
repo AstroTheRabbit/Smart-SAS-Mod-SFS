@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Collections.Generic;
+using UnityEngine;
 using HarmonyLib;
+using SFS.IO;
 using ModLoader;
 using ModLoader.Helpers;
-using SFS.IO;
-using UnityEngine;
 
 namespace SmartSASMod
 {
@@ -16,7 +16,7 @@ namespace SmartSASMod
         public override string DisplayName => "Smart SAS";
         public override string Author => "Astro The Rabbit";
         public override string MinimumGameVersionNecessary => "1.5.10.2";
-        public override string ModVersion => "v1.6";
+        public override string ModVersion => "v1.7";
         public override string Description => "Adds a variety of control options for the stability assist system (SAS).";
 
         public override Dictionary<string, string> Dependencies { get; } = new Dictionary<string, string> { { "UITools", "1.1.5" } };
@@ -41,8 +41,8 @@ namespace SmartSASMod
             {
                 try
                 {
-                    Assembly ANAISAssembly = Loader.main.GetLoadedMods().First((Mod mod) => mod.ModNameID == "ANAIS").GetType().Assembly;
-                    Type velocityArrowPatch = ANAISAssembly.GetTypes().First((Type type) => type.Name == "VelocityArrowDrawer_OnLocationChange_Patch");
+                    Assembly ANAISAssembly = Loader.main.GetLoadedMods().First(mod => mod.ModNameID == "ANAIS").GetType().Assembly;
+                    Type velocityArrowPatch = ANAISAssembly.GetTypes().First(type => type.Name == "VelocityArrowDrawer_OnLocationChange_Patch");
                     ANAISTraverse = Traverse.Create(velocityArrowPatch);
                 } 
                 catch

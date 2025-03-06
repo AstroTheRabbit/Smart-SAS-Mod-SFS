@@ -1,10 +1,10 @@
 ﻿using System;
-using ModLoader;
-using ModLoader.Helpers;
+using UnityEngine;
 using SFS.IO;
 using SFS.Input;
 using SFS.Parsers.Json;
-using UnityEngine;
+using ModLoader;
+using ModLoader.Helpers;
 
 namespace SmartSASMod
 {
@@ -14,7 +14,6 @@ namespace SmartSASMod
         public float windowScale = 1f;
         public Vector2Int windowPosition = new Vector2Int( -850, -500 );
         public bool useANAISTargeting = true;
-        // public bool keepSASSettingsOnDetach = false;
     }
 
     public static class SettingsManager
@@ -142,17 +141,17 @@ namespace SmartSASMod
                 AddOnKeyDown_World(keybindsManager.Key_Retrograde, () =>
                 {
                     GUI.SetDirection(DirectionMode.Prograde);
-                    GUI.SetOffsetValue(GUI.angleInput, 180);
+                    GUI.SetOffsetValue(180);
                 });
                 AddOnKeyDown_World(keybindsManager.Key_Default, () => GUI.SetDirection(DirectionMode.Default));
 
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative, () => GUI.AddOffsetValue(GUI.angleInput, -10));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive, () => GUI.AddOffsetValue(GUI.angleInput, 10));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative_Small, () => GUI.AddOffsetValue(GUI.angleInput, -1));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive_Small, () => GUI.AddOffsetValue(GUI.angleInput, 1));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative, () => GUI.AddOffsetValue(-10));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive, () => GUI.AddOffsetValue(10));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative_Small, () => GUI.AddOffsetValue(-1));
+                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive_Small, () => GUI.AddOffsetValue(1));
 
-                AddOnKeyDown_World(keybindsManager.Key_Reset_Offset, () => GUI.SetOffsetValue(GUI.angleInput, 0));
-                AddOnKeyDown_World(keybindsManager.Key_Flip_Offset, () => GUI.AddOffsetValue(GUI.angleInput, 180));
+                AddOnKeyDown_World(keybindsManager.Key_Reset_Offset, () => GUI.SetOffsetValue(0));
+                AddOnKeyDown_World(keybindsManager.Key_Flip_Offset, () => GUI.AddOffsetValue(180));
             }
         }
     }

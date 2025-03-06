@@ -1,11 +1,56 @@
+using System.Globalization;
+using System.Collections.Generic;
 using UnityEngine;
+using SFS.UI;
 using SFS.World;
+using Button = SFS.UI.ModGUI.Button;
 
 namespace SmartSASMod
 {
     public class SASComponent : MonoBehaviour
     {
-        public DirectionMode currentDirection = DirectionMode.Default;
-        public SelectableObject previousTarget;
+        DirectionMode direction = DirectionMode.Default;
+        float offset;
+
+        public DirectionMode Direction
+        {
+            get => direction;
+            set
+            {
+                DirectionMode prev = direction;
+                direction = value;
+                if (prev != direction && IsCurrentRocket())
+                    OnDirectionChange();
+            }
+        }
+
+        public float Offset
+        {
+            get => offset;
+            set
+            {
+                float prev = offset;
+                offset = value;
+                if (prev != offset && IsCurrentRocket())
+                    OnOffsetChange();
+            }
+        }
+
+        public SelectableObject Target { get; set; }
+
+        bool IsCurrentRocket() => PlayerController.main.player.Value == GetComponent<Rocket>();
+
+        public void OnDirectionChange()
+        {
+            foreach (KeyValuePair<DirectionMode, Button> kvp in GUI.buttons)
+            {
+                kvp.Value.gameObject.GetComponent<ButtonPC>().SetSelected(kvp.Key == direction);
+            }
+        }
+
+        public void OnOffsetChange()
+        {
+            GUI.angleInput.Text = offset.ToString("0.00", CultureInfo.InvariantCulture);
+        }
     }
 }
