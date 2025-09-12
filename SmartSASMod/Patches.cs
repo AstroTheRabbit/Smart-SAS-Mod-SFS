@@ -34,11 +34,11 @@ namespace SmartSASMod
                     float mass = __instance.rb2d.mass;
                     if (mass > 200f)
                         torque /= Mathf.Pow(mass / 200f, 0.35f);
-                    
+
                     float maxAcceleration = torque * Mathf.Rad2Deg / mass;
                     float stoppingTime = Mathf.Abs(angularVelocity / maxAcceleration);
                     float currentTime = Mathf.Abs(deltaAngle / angularVelocity);
-                    
+
                     if (stoppingTime > currentTime)
                     {
                         return Mathf.Sign(angularVelocity);
@@ -68,7 +68,7 @@ namespace SmartSASMod
                             SelectableObject target = __instance == rocket ? Map.navigation.target : sas.Target; // Keeps the last selected target if the sas comp.'s rocket isn't the currently controlled rocket.
                             if (Main.ANAISTraverse is Traverse traverse && __instance == rocket)
                             {
-                                if (traverse.Field("_navState").GetValue().ToString() == "ANAIS_TRANSFER_PLANNED")
+                                if (traverse.Field("_navState").GetValue().ToString() != "DEFAULT")
                                 {
                                     Double2 dv = traverse.Field<Double2>("_relativeVelocity").Value;
                                     targetRotation = GUI.NormaliseAngle((float)Math.Atan2(dv.y, dv.x) * Mathf.Rad2Deg);
