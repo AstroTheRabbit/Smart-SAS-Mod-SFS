@@ -30,28 +30,47 @@ namespace SmartSASMod
             Vector2Int pos = SettingsManager.settings.windowPosition;
             Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 290, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
 
-            window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () => 
+            window.CreateLayoutGroup(SFS.UI.ModGUI.Type.Vertical, UnityEngine.TextAnchor.MiddleCenter,10f);
+            window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () =>
             {
                 SettingsManager.settings.windowPosition = Vector2Int.RoundToInt(window.Position);
                 SettingsManager.Save();
             };
 
-            buttons = new Dictionary<DirectionMode, SFS.UI.ModGUI.Button>
-            {
-                {DirectionMode.Prograde, Builder.CreateButton(window, 160, 50, -85, -25, () => ToggleDirection(DirectionMode.Prograde), "Prograde")},
-                {DirectionMode.Target, Builder.CreateButton(window, 160, 50, 85, -25, () => ToggleDirection(DirectionMode.Target), "Target")},
-                {DirectionMode.Surface, Builder.CreateButton(window, 160, 50, -85, -80, () => ToggleDirection(DirectionMode.Surface), "Surface")},
-                {DirectionMode.None, Builder.CreateButton(window, 160, 50, 85, -80, () => ToggleDirection(DirectionMode.None), "None")}
-            };
+            buttons = new Dictionary<DirectionMode, SFS.UI.ModGUI.Button>();
+
+            SFS.UI.ModGUI.Container buttonsTop_Container =  SFS.UI.ModGUI.Builder.CreateContainer(window);
+            buttonsTop_Container.CreateLayoutGroup(SFS.UI.ModGUI.Type.Horizontal, UnityEngine.TextAnchor.MiddleCenter,5f);
+            buttons.Add(DirectionMode.Prograde, Builder.CreateButton(buttonsTop_Container, 160, 50, 0,0, () => ToggleDirection(DirectionMode.Prograde), "Prograde"));
+            buttons.Add(DirectionMode.Target, Builder.CreateButton(buttonsTop_Container, 160, 50, 0, 0, () => ToggleDirection(DirectionMode.Target), "Target"));
+
+            SFS.UI.ModGUI.Container buttonsBottom_Container =  SFS.UI.ModGUI.Builder.CreateContainer(window);
+            buttonsBottom_Container.CreateLayoutGroup(SFS.UI.ModGUI.Type.Horizontal, UnityEngine.TextAnchor.MiddleCenter,5f);
+            buttons.Add(DirectionMode.Surface, Builder.CreateButton(buttonsBottom_Container, 160, 50, 0, 0, () => ToggleDirection(DirectionMode.Surface), "Surface"));
+            buttons.Add(DirectionMode.None, Builder.CreateButton(buttonsBottom_Container, 160, 50, 0, 0, () => ToggleDirection(DirectionMode.None), "None"));
 
             Builder.CreateLabel(window, 180, 50, 0, -145, "Angle Offset");
-            angleInput = Builder.CreateTextInput(window, 110, 50, 0, -200, "0.00");
+//~             angleInput = Builder.CreateTextInput(window, 110, 50, 0, -200, "0.00");
+//~             angleInput.field.onEndEdit.AddListener(VerifyOffsetInput);
+
+//~             Builder.CreateButton(window, 50, 50, -140, -200, () => AddOffsetValue(-10), "<<");
+//~             Builder.CreateButton(window, 50, 50, -85, -200, () => AddOffsetValue(-1), "<");
+//~             Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(10), ">>");
+//~             Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(1), ">");
+
+            SFS.UI.ModGUI.Container offset_Container =  SFS.UI.ModGUI.Builder.CreateContainer(window);
+            offset_Container.CreateLayoutGroup(SFS.UI.ModGUI.Type.Horizontal, UnityEngine.TextAnchor.MiddleCenter,5f);
+
+            Builder.CreateButton(offset_Container, 40, 30, 0, 0, () => AddOffsetValue(-90), "<<<");
+            Builder.CreateButton(offset_Container, 30, 30, 0, 0, () => AddOffsetValue(-10), "<<");
+            Builder.CreateButton(offset_Container, 30, 30, 0, 0, () => AddOffsetValue(-1), "<");
+
+            angleInput = Builder.CreateTextInput(offset_Container, 110, 50, 0, 0, "0.00");
             angleInput.field.onEndEdit.AddListener(VerifyOffsetInput);
 
-            Builder.CreateButton(window, 50, 50, -140, -200, () => AddOffsetValue(-10), "<<");
-            Builder.CreateButton(window, 50, 50, -85, -200, () => AddOffsetValue(-1), "<");
-            Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(10), ">>");
-            Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(1), ">");
+            Builder.CreateButton(offset_Container, 30, 30, 0, 0, () => AddOffsetValue(1), ">");
+            Builder.CreateButton(offset_Container, 30, 30, 0, 0, () => AddOffsetValue(10), ">>");
+            Builder.CreateButton(offset_Container, 40, 30, 0, 0, () => AddOffsetValue(90), ">>>");
 
             window.gameObject.transform.localScale = new Vector3(SettingsManager.settings.windowScale, SettingsManager.settings.windowScale, 1f);
 
