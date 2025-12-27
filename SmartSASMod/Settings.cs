@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using SFS.IO;
 using SFS.Input;
 using SFS.Parsers.Json;
 using ModLoader;
@@ -12,36 +11,23 @@ namespace SmartSASMod
     public class UserSettings
     {
         public float windowScale = 1f;
-        public Vector2Int windowPosition = new Vector2Int( -850, -500 );
+        public Vector2Int windowPosition = new Vector2Int(-850, -500);
         public bool useANAISTargeting = true;
     }
 
     public static class SettingsManager
     {
-        public static readonly FilePath Path = Main.modFolder.ExtendToFile("settings.txt");
-        static readonly FilePath oldPath = Main.modFolder.ExtendToFile("Config.txt");
+        public static IFile Path => new DefaultFolder(Main.main.ModFolder).GetFile("settings.txt");
         public static UserSettings settings;
         public static KeybindsManager keybindsManager;
 
         public static void Load()
         {
-            UserSettings oldSettings = null;
-            if (oldPath.FileExists())
+            if (!JsonWrapper.TryLoadJson(Path, out settings))
             {
-                if (!JsonWrapper.TryLoadJson(oldPath, out oldSettings))
-                {
-                    Debug.Log("Smart SAS: Converting old Config.txt to settings.txt.");
-                }
-                oldPath.DeleteFile();
+                Debug.LogWarning("Smart SAS: Settings file couldn't be loaded correctly or doesn't exist, reverting to defaults.");
             }
-            else if (oldSettings == null && !JsonWrapper.TryLoadJson(Path, out settings) && Path.FileExists())
-            {
-                Debug.Log("Smart SAS: Settings file couldn't be loaded correctly or doesn't exist, reverting to defaults.");
-            }
-
-            settings = oldSettings ?? settings ?? new UserSettings();
             Save();
-
             KeybindsManager.Setup();
 
         }
@@ -75,7 +61,7 @@ namespace SmartSASMod
         public static KeybindsManager keybindsManager;
 		public static void Setup()
         {
-            keybindsManager = SetupKeybindings<KeybindsManager>(Main.mod);
+            keybindsManager = SetupKeybindings<KeybindsManager>(Main.main);
             SceneHelper.OnWorldSceneLoaded += KeyFunctions.AssignFunctions;
         }
         public override void CreateUI()

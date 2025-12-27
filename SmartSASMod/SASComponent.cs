@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Collections.Generic;
 using UnityEngine;
-using SFS.UI;
+using UITools;
 using SFS.World;
 using Button = SFS.UI.ModGUI.Button;
 
@@ -44,7 +44,7 @@ namespace SmartSASMod
         {
             foreach (KeyValuePair<DirectionMode, Button> kvp in GUI.buttons)
             {
-                kvp.Value.gameObject.GetComponent<ButtonPC>().SetSelected(kvp.Key == direction);
+                kvp.Value.SetSelected(kvp.Key == direction);
             }
         }
 

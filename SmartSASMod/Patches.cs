@@ -11,13 +11,13 @@ namespace SmartSASMod
     public static class Patches
     {
         [HarmonyPatch(typeof(Rocket), "GetStopRotationTurnAxis")]
-        class Rocket_GetStopRotationTurnAxis
+        public class Rocket_GetStopRotationTurnAxis
         {
-            static float Postfix(float result, Rocket __instance)
+            public static float Postfix(float result, Rocket __instance)
             {
 
                 SASComponent sas = __instance.GetOrAddComponent<SASComponent>();
-                __instance.rb2d.angularDrag = 0.05f;
+                __instance.rb2d.angularDamping = 0.05f;
 
                 if (!WorldTime.main.realtimePhysics.Value || !__instance.hasControl.Value)
                     return result;
@@ -81,18 +81,21 @@ namespace SmartSASMod
                                 }
                             }
 
-                            if (target is MapRocket)
+                            if (target is MapPlayer player)
                             {
-                                if (target != sas.Target)
+                                if (player != sas.Target)
                                 {
-                                    MsgDrawer.main.Log("Targeting " + (target as MapRocket).Select_DisplayName);
+                                    MsgDrawer.main.Log("Targeting " + player.Select_DisplayName);
                                     sas.Target = target;
                                 }
-                                Vector2 targetOffset =
-                                    (target as MapRocket).rocket.location.Value.GetSolarSystemPosition((WorldTime.main != null) ? WorldTime.main.worldTime : 0.0)
-                                        + (Vector2)(target as MapRocket).rocket.rb2d.transform.TransformVector((target as MapRocket).rocket.mass.GetCenterOfMass())
-                                    - (__instance.location.Value.GetSolarSystemPosition((WorldTime.main != null) ? WorldTime.main.worldTime : 0.0)
-                                        + (Vector2)__instance.rb2d.transform.TransformVector(__instance.mass.GetCenterOfMass()));
+                                double time = (WorldTime.main != null) ? WorldTime.main.worldTime : 0;
+
+                                Vector2 targetOffset = player.Player.location.Value.GetSolarSystemPosition(time)
+                                        - (__instance.location.Value.GetSolarSystemPosition(time)
+                                        + (Vector2) __instance.rb2d.transform.TransformVector(__instance.mass.GetCenterOfMass()));
+
+                                if (player is MapRocket mapRocket)
+                                    targetOffset += (Vector2) mapRocket.rocket.rb2d.transform.TransformVector(mapRocket.rocket.mass.GetCenterOfMass());
 
                                 return TargetRotationToTorque(Mathf.Atan2(targetOffset.y, targetOffset.x) * Mathf.Rad2Deg);
                             }
@@ -138,7 +141,7 @@ namespace SmartSASMod
                         return TargetRotationToTorque(targetRotation);
 
                     case DirectionMode.None:
-                        __instance.rb2d.angularDrag = 0;
+                        __instance.rb2d.angularDamping = 0;
                         return 0;
                 }
                 return result;

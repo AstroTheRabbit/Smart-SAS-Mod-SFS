@@ -8,14 +8,16 @@
   <ItemGroup>
     <Reference Include="../../Other Files/Game Dependencies/*">
       <HintPath>../../Other Files/Game Dependencies/*.dll</HintPath>
+      <!-- `<Private>false</Private>` stops the DLLs from being copied to the output directory when the mod is compiled -->
+      <Private>false</Private>
     </Reference>
     <Reference Include="UITools">
       <HintPath>../../Other Files/Mods Folder/UITools/UITools.dll</HintPath>
+      <Private>false</Private>
     </Reference>
 
     <!-- The following DLLs cause warnings on build -->
-    <Reference Remove="**/System.IO.Compression.dll"/>
-    <Reference Remove="**/System.Net.Http.dll"/>
+    <Reference Remove="**/System.*.dll"/>
     <Reference Remove="**/Firebase.*.dll"/>
     <Reference Remove="**/Unity.Compat.dll"/>
     <Reference Remove="**/Unity.Tasks.dll"/>
