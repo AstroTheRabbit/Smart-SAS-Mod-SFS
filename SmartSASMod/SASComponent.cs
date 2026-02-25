@@ -1,16 +1,16 @@
-using System.Globalization;
 using System.Collections.Generic;
-using UnityEngine;
-using UITools;
+using System.Globalization;
 using SFS.World;
+using UITools;
+using UnityEngine;
 using Button = SFS.UI.ModGUI.Button;
 
 namespace SmartSASMod
 {
     public class SASComponent : MonoBehaviour
     {
-        DirectionMode direction = DirectionMode.Default;
-        float offset;
+        private DirectionMode direction = DirectionMode.Default;
+        private float offset;
 
         public DirectionMode Direction
         {
@@ -31,14 +31,14 @@ namespace SmartSASMod
             {
                 float prev = offset;
                 offset = value;
-                if (prev != offset && IsCurrentRocket())
+                if (!Mathf.Approximately(prev, offset) && IsCurrentRocket())
                     OnOffsetChange();
             }
         }
 
         public SelectableObject Target { get; set; }
 
-        bool IsCurrentRocket() => PlayerController.main.player.Value == GetComponent<Rocket>();
+        private bool IsCurrentRocket() => PlayerController.main.player.Value == GetComponent<Rocket>();
 
         public void OnDirectionChange()
         {

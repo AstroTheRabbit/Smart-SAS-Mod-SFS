@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Globalization;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Globalization;
 using SFS.UI;
-using SFS.World;
 using SFS.UI.ModGUI;
+using SFS.World;
+using UnityEngine;
 
 namespace SmartSASMod
 {
@@ -18,8 +18,9 @@ namespace SmartSASMod
     }
     public static class GUI
     {
-        static GameObject holder;
-        static readonly int MainWindowID = Builder.GetRandomID();
+        // ReSharper disable once InconsistentNaming
+        private static GameObject holder;
+        private static readonly int MainWindowID = Builder.GetRandomID();
         public static TextInput angleInput;
         public static Dictionary<DirectionMode, SFS.UI.ModGUI.Button> buttons;
 
@@ -27,13 +28,13 @@ namespace SmartSASMod
         {
             holder = Builder.CreateHolder(Builder.SceneToAttach.CurrentScene, "Smart SAS GUI Holder");
 
-            Vector2Int pos = SettingsManager.settings.windowPosition;
+            Vector2Int pos = Settings.settings.windowPosition;
             Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 290, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
 
             window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () => 
             {
-                SettingsManager.settings.windowPosition = Vector2Int.RoundToInt(window.Position);
-                SettingsManager.Save();
+                Settings.settings.windowPosition = Vector2Int.RoundToInt(window.Position);
+                Settings.Save();
             };
 
             buttons = new Dictionary<DirectionMode, SFS.UI.ModGUI.Button>
@@ -53,7 +54,7 @@ namespace SmartSASMod
             Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(10), ">>");
             Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(1), ">");
 
-            window.gameObject.transform.localScale = new Vector3(SettingsManager.settings.windowScale, SettingsManager.settings.windowScale, 1f);
+            window.gameObject.transform.localScale = new Vector3(Settings.settings.windowScale, Settings.settings.windowScale, 1f);
 
             PlayerController.main.player.OnChange += OnPlayerChange;
         }

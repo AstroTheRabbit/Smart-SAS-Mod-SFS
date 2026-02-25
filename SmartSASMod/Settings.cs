@@ -1,47 +1,47 @@
 ﻿using System;
-using UnityEngine;
-using SFS.Input;
-using SFS.Parsers.Json;
 using ModLoader;
 using ModLoader.Helpers;
+using SFS.Input;
+using SFS.IO;
+using UITools;
+using UnityEngine;
+
+// ReSharper disable InconsistentNaming
+// ReSharper disable FieldCanBeMadeReadOnly.Global
 
 namespace SmartSASMod
 {
-    [Serializable]
-    public class UserSettings
+    public class Settings : ModSettings<SettingsData>
+    {
+        public static Settings Main { get; private set; }
+        internal static Action Save { get; private set; }
+        protected override FilePath SettingsFile => new FolderPath(Entrypoint.Main.ModFolder).ExtendToFile("settings.txt");
+
+        public static void Init()
+        {
+            Main = new Settings();
+            Main.Initialize();
+        }
+        
+        protected override void RegisterOnVariableChange(Action onChange)
+        {
+            Save = onChange;
+            Application.quitting += onChange;
+        }
+    }
+    
+    public class SettingsData
     {
         public float windowScale = 1f;
         public Vector2Int windowPosition = new Vector2Int(-850, -500);
+        // ReSharper disable once ConvertToConstant.Global
         public bool useANAISTargeting = true;
-    }
-
-    public static class SettingsManager
-    {
-        public static IFile Path => new DefaultFolder(Main.main.ModFolder).GetFile("settings.txt");
-        public static UserSettings settings;
-        public static KeybindsManager keybindsManager;
-
-        public static void Load()
-        {
-            if (!JsonWrapper.TryLoadJson(Path, out settings))
-            {
-                Debug.LogWarning("Smart SAS: Settings file couldn't be loaded correctly or doesn't exist, reverting to defaults.");
-            }
-            Save();
-            KeybindsManager.Setup();
-
-        }
-
-        public static void Save()
-        {
-            if (settings == null)
-                Load();
-            Path.WriteText(JsonWrapper.ToJson(settings, true));
-        }
     }
 
     public class KeybindsManager : ModKeybindings
     {
+        public static KeybindsManager Main { get; private set; }
+        
         public KeybindingsPC.Key Key_Prograde = KeyCode.None;
         public KeybindingsPC.Key Key_Target = KeyCode.None;
         public KeybindingsPC.Key Key_Surface = KeyCode.None;
@@ -58,12 +58,12 @@ namespace SmartSASMod
         public KeybindingsPC.Key Key_Reset_Offset = KeyCode.None;
         public KeybindingsPC.Key Key_Flip_Offset = KeyCode.None;
 
-        public static KeybindsManager keybindsManager;
-		public static void Setup()
+		public static void Init()
         {
-            keybindsManager = SetupKeybindings<KeybindsManager>(Main.main);
+            Main = SetupKeybindings<KeybindsManager>(Entrypoint.Main);
             SceneHelper.OnWorldSceneLoaded += KeyFunctions.AssignFunctions;
         }
+        
         public override void CreateUI()
         {
             KeybindsManager defaults = new KeybindsManager();
@@ -119,25 +119,25 @@ namespace SmartSASMod
 
             public static void AssignFunctions()
             {
-                AddOnKeyDown_World(keybindsManager.Key_Prograde, () => GUI.ToggleDirection(DirectionMode.Prograde));
-                AddOnKeyDown_World(keybindsManager.Key_Target, () => GUI.ToggleDirection(DirectionMode.Target));
-                AddOnKeyDown_World(keybindsManager.Key_Surface, () => GUI.ToggleDirection(DirectionMode.Surface));
-                AddOnKeyDown_World(keybindsManager.Key_None, () => GUI.ToggleDirection(DirectionMode.None));
+                AddOnKeyDown_World(Main.Key_Prograde, () => GUI.ToggleDirection(DirectionMode.Prograde));
+                AddOnKeyDown_World(Main.Key_Target, () => GUI.ToggleDirection(DirectionMode.Target));
+                AddOnKeyDown_World(Main.Key_Surface, () => GUI.ToggleDirection(DirectionMode.Surface));
+                AddOnKeyDown_World(Main.Key_None, () => GUI.ToggleDirection(DirectionMode.None));
                 
-                AddOnKeyDown_World(keybindsManager.Key_Retrograde, () =>
+                AddOnKeyDown_World(Main.Key_Retrograde, () =>
                 {
                     GUI.SetDirection(DirectionMode.Prograde);
                     GUI.SetOffsetValue(180);
                 });
-                AddOnKeyDown_World(keybindsManager.Key_Default, () => GUI.SetDirection(DirectionMode.Default));
+                AddOnKeyDown_World(Main.Key_Default, () => GUI.SetDirection(DirectionMode.Default));
 
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative, () => GUI.AddOffsetValue(-10));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive, () => GUI.AddOffsetValue(10));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Negative_Small, () => GUI.AddOffsetValue(-1));
-                AddOnKeyDown_World(keybindsManager.Key_Offset_Positive_Small, () => GUI.AddOffsetValue(1));
+                AddOnKeyDown_World(Main.Key_Offset_Negative, () => GUI.AddOffsetValue(-10));
+                AddOnKeyDown_World(Main.Key_Offset_Positive, () => GUI.AddOffsetValue(10));
+                AddOnKeyDown_World(Main.Key_Offset_Negative_Small, () => GUI.AddOffsetValue(-1));
+                AddOnKeyDown_World(Main.Key_Offset_Positive_Small, () => GUI.AddOffsetValue(1));
 
-                AddOnKeyDown_World(keybindsManager.Key_Reset_Offset, () => GUI.SetOffsetValue(0));
-                AddOnKeyDown_World(keybindsManager.Key_Flip_Offset, () => GUI.AddOffsetValue(180));
+                AddOnKeyDown_World(Main.Key_Reset_Offset, () => GUI.SetOffsetValue(0));
+                AddOnKeyDown_World(Main.Key_Flip_Offset, () => GUI.AddOffsetValue(180));
             }
         }
     }
