@@ -6,18 +6,42 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="../../Other Files/Game Dependencies/*">
-      <HintPath>../../Other Files/Game Dependencies/*.dll</HintPath>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\OtherFiles\GameDependancies\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\OtherFiles\GameDependancies\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\OtherFiles\GameDependancies\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="UITools">
-      <HintPath>../../Other Files/Mods Folder/UITools/UITools.dll</HintPath>
+      <HintPath>../../OtherFiles/ModsFolder/UITools/UITools.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\OtherFiles\GameDependancies\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>..\..\OtherFiles\GameDependancies\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\OtherFiles\GameDependancies\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.Physics2DModule">
+      <HintPath>..\..\OtherFiles\GameDependancies\UnityEngine.Physics2DModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>..\..\OtherFiles\GameDependancies\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\..\OtherFiles\GameDependancies\UnityEngine.UI.dll</HintPath>
     </Reference>
 
     <!-- The following DLLs cause warnings on build -->
-    <Reference Remove="**/System.IO.Compression.dll"/>
-    <Reference Remove="**/System.Net.Http.dll"/>
-    <Reference Remove="**/Firebase.*.dll"/>
-    <Reference Remove="**/Unity.Compat.dll"/>
-    <Reference Remove="**/Unity.Tasks.dll"/>
+    <Reference Remove="**/System.IO.Compression.dll" />
+    <Reference Remove="**/System.Net.Http.dll" />
+    <Reference Remove="**/Firebase.*.dll" />
+    <Reference Remove="**/Unity.Compat.dll" />
+    <Reference Remove="**/Unity.Tasks.dll" />
   </ItemGroup>
 </Project>

@@ -17,7 +17,7 @@ namespace SmartSASMod
             {
 
                 SASComponent sas = __instance.GetOrAddComponent<SASComponent>();
-                __instance.rb2d.angularDrag = 0.05f;
+                __instance.rb2d.angularDamping = 0.05f;
 
                 if (!WorldTime.main.realtimePhysics.Value || !__instance.hasControl.Value)
                     return result;
@@ -138,7 +138,7 @@ namespace SmartSASMod
                         return TargetRotationToTorque(targetRotation);
 
                     case DirectionMode.None:
-                        __instance.rb2d.angularDrag = 0;
+                        __instance.rb2d.angularDamping = 0;
                         return 0;
                 }
                 return result;

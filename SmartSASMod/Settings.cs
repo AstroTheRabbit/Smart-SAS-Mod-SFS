@@ -16,41 +16,25 @@ namespace SmartSASMod
         public bool useANAISTargeting = true;
     }
 
-    public static class SettingsManager
+    public class SettingsManager : UITools.ModSettings<UserSettings>
     {
-        public static readonly FilePath Path = Main.modFolder.ExtendToFile("settings.txt");
-        static readonly FilePath oldPath = Main.modFolder.ExtendToFile("Config.txt");
-        public static UserSettings settings;
+        public static SettingsManager Main { get; private set; }
+        public static System.Action Save { get; private set; }
+
+        protected override SFS.IO.FilePath SettingsFile => new SFS.IO.FolderPath(SmartSASMod.Main.mod.ModFolder).ExtendToFile("Settings.txt");
+
         public static KeybindsManager keybindsManager;
 
-        public static void Load()
+        public static void Init()
         {
-            UserSettings oldSettings = null;
-            if (oldPath.FileExists())
-            {
-                if (!JsonWrapper.TryLoadJson(oldPath, out oldSettings))
-                {
-                    Debug.Log("Smart SAS: Converting old Config.txt to settings.txt.");
-                }
-                oldPath.DeleteFile();
-            }
-            else if (oldSettings == null && !JsonWrapper.TryLoadJson(Path, out settings) && Path.FileExists())
-            {
-                Debug.Log("Smart SAS: Settings file couldn't be loaded correctly or doesn't exist, reverting to defaults.");
-            }
-
-            settings = oldSettings ?? settings ?? new UserSettings();
-            Save();
-
+            Main = new SettingsManager();
             KeybindsManager.Setup();
-
+            Main.Initialize();
         }
 
-        public static void Save()
+        protected override void RegisterOnVariableChange(System.Action onChange)
         {
-            if (settings == null)
-                Load();
-            Path.WriteText(JsonWrapper.ToJson(settings, true));
+            UnityEngine.Application.quitting += Save = onChange;
         }
     }
 
@@ -137,7 +121,7 @@ namespace SmartSASMod
                 AddOnKeyDown_World(keybindsManager.Key_Target, () => GUI.ToggleDirection(DirectionMode.Target));
                 AddOnKeyDown_World(keybindsManager.Key_Surface, () => GUI.ToggleDirection(DirectionMode.Surface));
                 AddOnKeyDown_World(keybindsManager.Key_None, () => GUI.ToggleDirection(DirectionMode.None));
-                
+
                 AddOnKeyDown_World(keybindsManager.Key_Retrograde, () =>
                 {
                     GUI.SetDirection(DirectionMode.Prograde);
