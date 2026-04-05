@@ -20,16 +20,13 @@ namespace SmartSASMod
         public override string Description => "Adds a variety of control options for the stability assist system (SAS).";
 
         public override Dictionary<string, string> Dependencies { get; } = new Dictionary<string, string> { { "UITools", "1.1.6" } };
-//~         public Dictionary<string, FilePath> UpdatableFiles => new Dictionary<string, FilePath>() { { "https://github.com/AstroTheRabbit/Smart-SAS-Mod-SFS/releases/latest/download/SmartSASMod.dll", new FolderPath(ModFolder).ExtendToFile("SmartSASMod.dll") } };
 
         public static Mod mod;
-//~         public static FolderPath modFolder;
         public static Traverse ANAISTraverse = null;
 
         public override void Early_Load()
         {
             mod = this;
-//~             modFolder = new FolderPath(ModFolder);
             new Harmony("smartsasmod").PatchAll();
         }
 
