@@ -12,14 +12,15 @@ namespace SmartSASMod
 {
     public class Main : Mod
     {
-        public override string ModNameID => "smartsasdarth";
-        public override string DisplayName => "Smart SAS (Darthan Fork)";
+        public override string ModNameID => "smartsas";
+        public override string DisplayName => "Smart SAS";
         public override string Author => "Astro The Rabbit, Darthan184";
         public override string MinimumGameVersionNecessary => "1.6.00.16";
-        public override string ModVersion => "1.7-Darthan184-2";
+        public override string ModVersion => "1.7";
         public override string Description => "Adds a variety of control options for the stability assist system (SAS).";
 
         public override Dictionary<string, string> Dependencies { get; } = new Dictionary<string, string> { { "UITools", "1.1.6" } };
+        public Dictionary<string, FilePath> UpdatableFiles => new Dictionary<string, FilePath>() { { "https://github.com/AstroTheRabbit/Smart-SAS-Mod-SFS/releases/latest/download/SmartSASMod.dll", new FolderPath(ModFolder).ExtendToFile("SmartSASMod.dll") } };
 
         public static Mod mod;
         public static Traverse ANAISTraverse = null;
