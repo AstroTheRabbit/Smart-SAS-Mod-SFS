@@ -4,45 +4,41 @@ using System.Globalization;
 using SFS.UI;
 using SFS.UI.ModGUI;
 using SFS.World;
+using UITools;
 using UnityEngine;
+using ModButton = SFS.UI.ModGUI.Button;
 
 namespace SmartSASMod
 {
-    public enum DirectionMode
-    {
-        Prograde,
-        Target,
-        Surface,
-        None,
-        Default
-    }
     public static class GUI
     {
         // ReSharper disable once InconsistentNaming
         private static GameObject holder;
         private static readonly int MainWindowID = Builder.GetRandomID();
         public static TextInput angleInput;
-        public static Dictionary<DirectionMode, SFS.UI.ModGUI.Button> buttons;
+        public static Dictionary<DirectionMode, ModButton> buttons;
 
         public static void SpawnGUI()
         {
             holder = Builder.CreateHolder(Builder.SceneToAttach.CurrentScene, "Smart SAS GUI Holder");
+            Window window = Builder.CreateWindow
+            (
+                holder.transform,
+                MainWindowID,
+                360,
+                290,
+                draggable: true,
+                savePosition: true,
+                titleText: "Smart SAS"
+            );
+            window.RegisterPermanentSaving(Entrypoint.Main.ModNameID);
 
-            Vector2Int pos = Settings.settings.windowPosition;
-            Window window = Builder.CreateWindow(holder.transform, MainWindowID, 360, 290, pos.x, pos.y, true, true, 0.95f, "Smart SAS");
-
-            window.gameObject.GetComponent<DraggableWindowModule>().OnDropAction += () => 
-            {
-                Settings.settings.windowPosition = Vector2Int.RoundToInt(window.Position);
-                Settings.Save();
-            };
-
-            buttons = new Dictionary<DirectionMode, SFS.UI.ModGUI.Button>
+            buttons = new Dictionary<DirectionMode, ModButton>
             {
                 {DirectionMode.Prograde, Builder.CreateButton(window, 160, 50, -85, -25, () => ToggleDirection(DirectionMode.Prograde), "Prograde")},
                 {DirectionMode.Target, Builder.CreateButton(window, 160, 50, 85, -25, () => ToggleDirection(DirectionMode.Target), "Target")},
                 {DirectionMode.Surface, Builder.CreateButton(window, 160, 50, -85, -80, () => ToggleDirection(DirectionMode.Surface), "Surface")},
-                {DirectionMode.None, Builder.CreateButton(window, 160, 50, 85, -80, () => ToggleDirection(DirectionMode.None), "None")}
+                {DirectionMode.None, Builder.CreateButton(window, 160, 50, 85, -80, () => ToggleDirection(DirectionMode.None), "None")},
             };
 
             Builder.CreateLabel(window, 180, 50, 0, -145, "Angle Offset");
@@ -54,7 +50,7 @@ namespace SmartSASMod
             Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(10), ">>");
             Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(1), ">");
 
-            window.gameObject.transform.localScale = new Vector3(Settings.settings.windowScale, Settings.settings.windowScale, 1f);
+            window.gameObject.transform.localScale = Settings.settings.WindowScale * Vector3.one;
 
             PlayerController.main.player.OnChange += OnPlayerChange;
         }
@@ -63,13 +59,26 @@ namespace SmartSASMod
         {
             if (player is Rocket rocket)
             {
-                SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
-                sas.OnDirectionChange();
-                sas.OnOffsetChange();
+                SASComponent sas = rocket.GetSAS();
+                OnDirectionChange(sas);
+                OnOffsetChange(sas);
             }
         }
+        
+        public static void OnDirectionChange(SASComponent sas)
+        {
+            foreach (KeyValuePair<DirectionMode, ModButton> kvp in buttons)
+            {
+                kvp.Value.SetSelected(kvp.Key == sas.Direction);
+            }
+        }
+        
+        public static void OnOffsetChange(SASComponent sas)
+        {
+            angleInput.Text = sas.Offset.ToString("0.00", CultureInfo.InvariantCulture);
+        }
 
-        public static void CheckRocketControl(Action<Rocket> onControl)
+        public static void CheckRocketControl(this Action<Rocket> onControl)
         {
             if (PlayerController.main.player.Value is Rocket rocket)
             {
@@ -90,97 +99,45 @@ namespace SmartSASMod
 
         public static void SetDirection(DirectionMode direction)
         {
-            CheckRocketControl
-            (
-                rocket =>
-                {
-                    SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
-                    sas.Direction = direction;
-                }
-            );
+            CheckRocketControl(rocket =>
+            {
+                SASComponent sas = rocket.GetSAS();
+                sas.Direction = direction;
+            });
         }
 
         public static void ToggleDirection(DirectionMode direction)
         {
-            CheckRocketControl
-            (
-                rocket =>
-                {
-                    SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
-                    sas.Direction = sas.Direction != direction ? direction : DirectionMode.Default;
-                }
-            );
+            CheckRocketControl(rocket =>
+            {
+                SASComponent sas = rocket.GetSAS();
+                sas.Direction = sas.Direction != direction ? direction : DirectionMode.Default;
+            });
         }
 
         public static void AddOffsetValue(float offset)
         {
-            CheckRocketControl
-            (
-                rocket =>
-                {
-                    SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
-                    sas.Offset = NormaliseAngle(sas.Offset + offset);
-                }
-            );
+            CheckRocketControl(rocket =>
+            {
+                SASComponent sas = rocket.GetSAS();
+                sas.Offset = (sas.Offset + offset).NormaliseAngle();
+            });
         }
 
         public static void SetOffsetValue(float offset)
         {
-            CheckRocketControl
-            (
-                rocket =>
-                {
-                    SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
-                    sas.Offset = NormaliseAngle(offset);
-                }
-            );
-        }
-
-        public static float NormaliseAngle(float input)
-        {
-            float m = (input + 180f) % 360f;
-            return m < 0 ? m + 180f : m - 180f;
-        }
-
-        public static bool StringToFloat(string input, out float result)
-        {
-            if (input == "NaN" || input ==  "Infinity" || input ==  "-Infinity")
+            CheckRocketControl(rocket =>
             {
-                result = 0f;
-                return true;
-            }
-            try
-            {
-                result = float.Parse(input, NumberStyles.Float, CultureInfo.InvariantCulture);
-                return false;
-            }
-            catch
-            {
-                result = 0f;
-                return true;
-            }
+                SASComponent sas = rocket.GetSAS();
+                sas.Offset = offset.NormaliseAngle();
+            });
         }
 
         public static void VerifyOffsetInput(string input)
         {
             if (PlayerController.main.player.Value is Rocket rocket)
             {
-                SASComponent sas = rocket.GetOrAddComponent<SASComponent>();
-                if (input == "NaN" || input ==  "Infinity" || input ==  "-Infinity")
-                {
-                    sas.Offset = 0f;
-                }
-                else
-                {
-                    try
-                    {
-                        sas.Offset = float.Parse(input, NumberStyles.Float, CultureInfo.InvariantCulture);
-                    }
-                    catch
-                    {
-                        sas.Offset = 0f;
-                    }
-                }
+                rocket.GetSAS().Offset = input.InputToFloat();
             }
         }
     }

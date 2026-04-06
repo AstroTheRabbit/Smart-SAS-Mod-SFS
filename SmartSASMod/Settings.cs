@@ -6,15 +6,13 @@ using SFS.IO;
 using UITools;
 using UnityEngine;
 
-// ReSharper disable InconsistentNaming
-// ReSharper disable FieldCanBeMadeReadOnly.Global
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Global
 
 namespace SmartSASMod
 {
     public class Settings : ModSettings<SettingsData>
     {
         public static Settings Main { get; private set; }
-        internal static Action Save { get; private set; }
         protected override FilePath SettingsFile => new FolderPath(Entrypoint.Main.ModFolder).ExtendToFile("settings.txt");
 
         public static void Init()
@@ -25,38 +23,36 @@ namespace SmartSASMod
         
         protected override void RegisterOnVariableChange(Action onChange)
         {
-            Save = onChange;
             Application.quitting += onChange;
         }
     }
     
     public class SettingsData
     {
-        public float windowScale = 1f;
-        public Vector2Int windowPosition = new Vector2Int(-850, -500);
-        // ReSharper disable once ConvertToConstant.Global
-        public bool useANAISTargeting = true;
+        public float WindowScale { get; set; } = 1;
+        public bool UseManeuvers { get; set; } = true;
+        public float ProgradeMinimumSpeed { get; set; } = 3;
     }
 
     public class KeybindsManager : ModKeybindings
     {
         public static KeybindsManager Main { get; private set; }
         
-        public KeybindingsPC.Key Key_Prograde = KeyCode.None;
-        public KeybindingsPC.Key Key_Target = KeyCode.None;
-        public KeybindingsPC.Key Key_Surface = KeyCode.None;
-        public KeybindingsPC.Key Key_None = KeyCode.None;
+        public KeybindingsPC.Key Key_Prograde { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_Target { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_Surface { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_None { get; set; } = KeyCode.None;
 
-        public KeybindingsPC.Key Key_Retrograde = KeyCode.None;
-        public KeybindingsPC.Key Key_Default = KeyCode.None;
+        public KeybindingsPC.Key Key_Retrograde { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_Default { get; set; } = KeyCode.None;
 
-        public KeybindingsPC.Key Key_Offset_Negative = KeyCode.None;
-        public KeybindingsPC.Key Key_Offset_Positive = KeyCode.None;
-        public KeybindingsPC.Key Key_Offset_Negative_Small = KeyCode.None;
-        public KeybindingsPC.Key Key_Offset_Positive_Small = KeyCode.None;
+        public KeybindingsPC.Key Key_Offset_Negative { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_Offset_Positive { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_Offset_Negative_Small { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_Offset_Positive_Small { get; set; } = KeyCode.None;
 
-        public KeybindingsPC.Key Key_Reset_Offset = KeyCode.None;
-        public KeybindingsPC.Key Key_Flip_Offset = KeyCode.None;
+        public KeybindingsPC.Key Key_Reset_Offset { get; set; } = KeyCode.None;
+        public KeybindingsPC.Key Key_Flip_Offset { get; set; } = KeyCode.None;
 
 		public static void Init()
         {
@@ -82,33 +78,33 @@ namespace SmartSASMod
             CreateUI_Keybinding(
                 new [] {
                     Key_Offset_Negative,
-                    Key_Offset_Positive
+                    Key_Offset_Positive,
                 },
                 new [] {
                     defaults.Key_Offset_Negative,
-                    defaults.Key_Offset_Positive
+                    defaults.Key_Offset_Positive,
                 },
                 "Change offset by ±10"
             );
             CreateUI_Keybinding(
                 new [] {
                     Key_Offset_Negative_Small,
-                    Key_Offset_Positive_Small
+                    Key_Offset_Positive_Small,
                 },
                 new [] {
                     defaults.Key_Offset_Negative_Small,
-                    defaults.Key_Offset_Positive_Small
+                    defaults.Key_Offset_Positive_Small,
                 },
                 "Change offset by ±1"
             );
             CreateUI_Keybinding(
                 new [] {
                     Key_Reset_Offset,
-                    Key_Flip_Offset
+                    Key_Flip_Offset,
                 },
                 new [] {
                     defaults.Key_Reset_Offset,
-                    defaults.Key_Flip_Offset
+                    defaults.Key_Flip_Offset,
                 },
                 "Reset/Flip offset"
             );
