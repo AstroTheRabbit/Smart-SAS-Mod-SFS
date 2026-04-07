@@ -2,4 +2,5 @@
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=ANAIS/@EntryIndexedValue">ANAIS</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=SAS/@EntryIndexedValue">SAS</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=anais/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=anais_0027s/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=smartsas/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>

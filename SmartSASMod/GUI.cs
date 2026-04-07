@@ -7,19 +7,22 @@ using SFS.World;
 using UITools;
 using UnityEngine;
 using ModButton = SFS.UI.ModGUI.Button;
+using Object = UnityEngine.Object;
 
 namespace SmartSASMod
 {
     public static class GUI
     {
-        // ReSharper disable once InconsistentNaming
         private static GameObject holder;
         private static readonly int MainWindowID = Builder.GetRandomID();
         public static TextInput angleInput;
         public static Dictionary<DirectionMode, ModButton> buttons;
 
-        public static void SpawnGUI()
+        public static void CreateGUI()
         {
+            if (holder)
+                Object.Destroy(holder);
+                
             holder = Builder.CreateHolder(Builder.SceneToAttach.CurrentScene, "Smart SAS GUI Holder");
             Window window = Builder.CreateWindow
             (
@@ -45,17 +48,18 @@ namespace SmartSASMod
             angleInput = Builder.CreateTextInput(window, 110, 50, 0, -200, "0.00");
             angleInput.field.onEndEdit.AddListener(VerifyOffsetInput);
 
-            Builder.CreateButton(window, 50, 50, -140, -200, () => AddOffsetValue(-10), "<<");
-            Builder.CreateButton(window, 50, 50, -85, -200, () => AddOffsetValue(-1), "<");
-            Builder.CreateButton(window, 50, 50, 140, -200, () => AddOffsetValue(10), ">>");
-            Builder.CreateButton(window, 50, 50, 85, -200, () => AddOffsetValue(1), ">");
+            Builder.CreateButton(window, 50, 50, -140, -200, AddOffset(() => -Settings.settings.OffsetMedium), "<<");
+            Builder.CreateButton(window, 50, 50, -85, -200, AddOffset(() => -Settings.settings.OffsetSmall), "<");
+            
+            Builder.CreateButton(window, 50, 50, 85, -200, AddOffset(() => Settings.settings.OffsetSmall), ">");
+            Builder.CreateButton(window, 50, 50, 140, -200, AddOffset(() => Settings.settings.OffsetMedium), ">>");
 
             window.gameObject.transform.localScale = Settings.settings.WindowScale * Vector3.one;
 
             PlayerController.main.player.OnChange += OnPlayerChange;
         }
 
-        public static void OnPlayerChange(Player player)
+        private static void OnPlayerChange(Player player)
         {
             if (player is Rocket rocket)
             {
@@ -65,7 +69,7 @@ namespace SmartSASMod
             }
         }
         
-        public static void OnDirectionChange(SASComponent sas)
+        internal static void OnDirectionChange(SASComponent sas)
         {
             foreach (KeyValuePair<DirectionMode, ModButton> kvp in buttons)
             {
@@ -73,71 +77,82 @@ namespace SmartSASMod
             }
         }
         
-        public static void OnOffsetChange(SASComponent sas)
+        internal static void OnOffsetChange(SASComponent sas)
         {
             angleInput.Text = sas.Offset.ToString("0.00", CultureInfo.InvariantCulture);
         }
 
-        public static void CheckRocketControl(this Action<Rocket> onControl)
+        private static Action CheckRocketControl(Action<SASComponent> onControl)
         {
-            if (PlayerController.main.player.Value is Rocket rocket)
+            return () =>
             {
-                if (rocket.hasControl.Value)
+                if (PlayerController.main.player.Value is Rocket rocket)
                 {
-                    onControl(rocket);
+                    if (rocket.hasControl.Value)
+                    {
+                        onControl(rocket.GetSAS());
+                    }
+                    else
+                    {
+                        MsgDrawer.main.Log("Rocket is uncontrollable, cannot change SAS");
+                    }
                 }
                 else
                 {
-                    MsgDrawer.main.Log("Rocket is uncontrollable, cannot change SAS");
+                    MsgDrawer.main.Log("You aren't controlling a rocket...");
                 }
-            }
-            else
-            {
-                MsgDrawer.main.Log("You aren't controlling a rocket...");
-            }
+            };
         }
 
-        public static void SetDirection(DirectionMode direction)
+        public static Action SetDirection(DirectionMode direction)
         {
-            CheckRocketControl(rocket =>
-            {
-                SASComponent sas = rocket.GetSAS();
-                sas.Direction = direction;
-            });
+            return CheckRocketControl
+            (
+                sas =>
+                {
+                    sas.Direction = direction;
+                }
+            );
         }
-
-        public static void ToggleDirection(DirectionMode direction)
+        
+        public static Action ToggleDirection(DirectionMode direction)
         {
-            CheckRocketControl(rocket =>
-            {
-                SASComponent sas = rocket.GetSAS();
-                sas.Direction = sas.Direction != direction ? direction : DirectionMode.Default;
-            });
+            return CheckRocketControl
+            (
+                sas =>
+                {
+                    sas.Direction = direction != sas.Direction ? direction : DirectionMode.Default;
+                }
+            );
         }
 
-        public static void AddOffsetValue(float offset)
+        public static Action SetOffset(Func<float> offset)
         {
-            CheckRocketControl(rocket =>
-            {
-                SASComponent sas = rocket.GetSAS();
-                sas.Offset = (sas.Offset + offset).NormaliseAngle();
-            });
+            return CheckRocketControl
+            (
+                sas =>
+                {
+                    sas.Offset = offset().NormaliseAngle();
+                }
+            );
         }
 
-        public static void SetOffsetValue(float offset)
+        public static Action AddOffset(Func<float> offset)
         {
-            CheckRocketControl(rocket =>
-            {
-                SASComponent sas = rocket.GetSAS();
-                sas.Offset = offset.NormaliseAngle();
-            });
+            return CheckRocketControl
+            (
+                sas =>
+                {
+                    sas.Offset = (sas.Offset + offset()).NormaliseAngle();
+                }
+            );
         }
 
-        public static void VerifyOffsetInput(string input)
+        private static void VerifyOffsetInput(string input)
         {
             if (PlayerController.main.player.Value is Rocket rocket)
             {
-                rocket.GetSAS().Offset = input.InputToFloat();
+                rocket.GetSAS().Offset = input.StringToFloat() ?? 0;
             }
         }
     }

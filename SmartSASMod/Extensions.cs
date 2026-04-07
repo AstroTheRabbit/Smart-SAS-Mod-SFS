@@ -1,3 +1,4 @@
+using System.Globalization;
 using SFS.World;
 
 namespace SmartSASMod
@@ -15,12 +16,21 @@ namespace SmartSASMod
             return m < 0 ? m + 180f : m - 180f;
         }
         
-        public static float InputToFloat(this string input)
+        public static float? StringToFloat(this string input)
         {
-            if (float.TryParse(input, out float output) && !(float.IsNaN(output) || float.IsInfinity(output)))
-                return output;
-            else
-                return 0;
+            if (float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out float output))
+            {
+                if (!float.IsNaN(output) && !float.IsInfinity(output))
+                {
+                    return output;
+                }
+            }
+            return null;
+        }
+        
+        public static string FloatToString(this float input)
+        {
+            return input.ToString(CultureInfo.InvariantCulture);
         }
         
         public static float GetStopRotationTurnAxis(this Rocket rocket, float torque)

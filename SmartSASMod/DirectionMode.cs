@@ -76,8 +76,6 @@ namespace SmartSASMod
 
         private static float? GetTurnAxis_Target(Rocket rocket, float torque, float offset)
         {
-            // TODO: Need to manage `SASComponent.Target` through patches now.
-            
             SASComponent sas = rocket.GetSAS();
             if (!sas.Target)
             {
@@ -103,11 +101,19 @@ namespace SmartSASMod
                 }
             }
 
-            double time = WorldTime.main.worldTime;
-            Double2 currentPos = rocket.location.Value.GetSolarSystemPosition(time);
-            Double2 targetPos = sas.Target.Location.GetSolarSystemPosition(time);
+            Double2 currentPos, targetPos;
+            if (rocket.location.Value.planet == sas.Target.Location.planet)
+            {
+                currentPos = rocket.location.Value.position;
+                targetPos = sas.Target.Location.position;
+            }
+            else
+            {
+                double time = WorldTime.main.worldTime;
+                currentPos = rocket.location.Value.GetSolarSystemPosition(time);
+                targetPos = sas.Target.Location.GetSolarSystemPosition(time);
+            }
             Double2 dir = targetPos - currentPos;
-
             return TargetVectorToTurnAxis(dir, rocket, torque, offset);
         }
 

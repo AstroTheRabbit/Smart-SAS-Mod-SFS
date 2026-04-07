@@ -48,7 +48,7 @@ namespace SmartSASMod
             Settings.Init();
             KeybindsManager.Init();
             
-            SceneHelper.OnWorldSceneLoaded += GUI.SpawnGUI;
+            SceneHelper.OnWorldSceneLoaded += GUI.CreateGUI;
             try
             {
                 Assembly assembly = Loader.main.GetLoadedMods().First(mod => mod.ModNameID == "ANAIS").GetType().Assembly;
