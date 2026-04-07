@@ -4,6 +4,7 @@ using ModLoader.Helpers;
 using SFS.Input;
 using SFS.IO;
 using SFS.UI.ModGUI;
+using TMPro;
 using UITools;
 using UnityEngine;
 using LayoutType = SFS.UI.ModGUI.Type;
@@ -67,9 +68,9 @@ namespace SmartSASMod
                     GUI.Init();
                 }
             );
-            CreateInput("Prograde Minimum Speed", settings.ProgradeMinimumSpeed, v => settings.ProgradeMinimumSpeed = v);
+            CreateInput("Prograde Min. Speed", settings.ProgradeMinimumSpeed, v => settings.ProgradeMinimumSpeed = v);
 
-            ToggleWithLabel _ = Builder.CreateToggleWithLabel
+            ToggleWithLabel toggle = Builder.CreateToggleWithLabel
             (
                 box,
                 width, 
@@ -78,24 +79,33 @@ namespace SmartSASMod
                 () => settings.UseManeuvers = !settings.UseManeuvers,
                 labelText: "Use Maneuvers"
             );
+            ApplyFontStyle(toggle.label);
 
             Builder.CreateSeparator(box, width - 20);
-            Builder.CreateLabel(box, width - 20, 50, text: "Angle Offset Modifiers");
+            Builder.CreateLabel(box, width - 20, 40, text: "Angle Offset Modifiers");
             
-            CreateInput("Small", settings.OffsetSmall, v => settings.OffsetSmall = v);
-            CreateInput("Medium", settings.OffsetMedium, v => settings.OffsetMedium = v);
-            CreateInput("Large", settings.OffsetLarge, v => settings.OffsetLarge = v);
+            CreateInput("Small Change", settings.OffsetSmall, v => settings.OffsetSmall = v);
+            CreateInput("Medium Change", settings.OffsetMedium, v => settings.OffsetMedium = v);
+            CreateInput("Large Change", settings.OffsetLarge, v => settings.OffsetLarge = v);
 
             return box.gameObject;
 
-            void CreateInput(string label, float get, Action<float> set)
+            void CreateInput(string name, float get, Action<float> set)
             {
                 Container container = Builder.CreateContainer(box);
                 container.CreateLayoutGroup(LayoutType.Horizontal);
 
-                Builder.CreateLabel(container, half_width, 40, text: label);
+                Label label = Builder.CreateLabel(container, half_width, 40, text: name);
                 TextInput input = Builder.CreateTextInput(container, half_width, 40, text: get.FloatToString());
+                ApplyFontStyle(label);
                 AddOnChange(input, set);
+            }
+
+            void ApplyFontStyle(Label label)
+            {
+                label.TextAlignment = TextAlignmentOptions.Left;
+                label.AutoFontResize = false;
+                label.FontSize = 25;
             }
 
             void AddOnChange(TextInput input, Action<float> onValid)

@@ -7,17 +7,18 @@ using JetBrains.Annotations;
 using ModLoader;
 using ModLoader.Helpers;
 using SFS.IO;
+using UITools;
 using UnityEngine;
 
 namespace SmartSASMod
 {
     [UsedImplicitly]
-    public class Entrypoint : Mod // ! , IUpdatable
+    public class Entrypoint : Mod, IUpdatable
     {
         public override string ModNameID => "smartsas";
         public override string DisplayName => "Smart SAS";
         public override string Author => "Astro The Rabbit";
-        public override string MinimumGameVersionNecessary => "1.6.0.14";
+        public override string MinimumGameVersionNecessary => "1.6.00.16";
         public override string ModVersion => "2.0";
         public override string Description => "Adds a variety of control options for the stability assist system (SAS).";
 
