@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using ModLoader;
 using ModLoader.Helpers;
 using SFS.Input;
@@ -65,7 +64,7 @@ namespace SmartSASMod
                 v =>
                 {
                     settings.WindowScale = v;
-                    GUI.CreateGUI();
+                    GUI.Init();
                 }
             );
             CreateInput("Prograde Minimum Speed", settings.ProgradeMinimumSpeed, v => settings.ProgradeMinimumSpeed = v);
@@ -95,7 +94,7 @@ namespace SmartSASMod
                 container.CreateLayoutGroup(LayoutType.Horizontal);
 
                 Builder.CreateLabel(container, half_width, 40, text: label);
-                TextInput input = Builder.CreateTextInput(container, half_width, 40, text: get.ToString(CultureInfo.InvariantCulture));
+                TextInput input = Builder.CreateTextInput(container, half_width, 40, text: get.FloatToString());
                 AddOnChange(input, set);
             }
 
@@ -103,15 +102,10 @@ namespace SmartSASMod
             {
                 input.OnChange += text =>
                 {
-                    if (float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out float result))
+                    if (text.StringToFloat() is float result && result > 0)
                     {
-                        bool isFinite = !float.IsNaN(result) && !float.IsInfinity(result);
-                        if (isFinite && result > 0)
-                        {
-                            input.FieldColor = DefaultColor;
-                            onValid(result);
-                            return;
-                        }
+                        input.FieldColor = DefaultColor;
+                        onValid(result);
                     }
                     input.FieldColor = Color.red;
                 };
