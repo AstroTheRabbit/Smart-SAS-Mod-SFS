@@ -117,7 +117,10 @@ namespace SmartSASMod
                         input.FieldColor = DefaultColor;
                         onValid(result);
                     }
-                    input.FieldColor = Color.red;
+                    else
+                    {
+                        input.FieldColor = Color.red;
+                    }
                 };
             }
         }

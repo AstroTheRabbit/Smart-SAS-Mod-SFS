@@ -6,6 +6,7 @@ using SFS.UI.ModGUI;
 using SFS.World;
 using UITools;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using ModButton = SFS.UI.ModGUI.Button;
 using Object = UnityEngine.Object;
 using Type = SFS.UI.ModGUI.Type;
@@ -23,6 +24,9 @@ namespace SmartSASMod
         {
             if (holder)
                 Object.Destroy(holder);
+
+            if (SceneManager.GetActiveScene().name != "World_PC")
+                return;
 
             const int windowWidth = 400;
             const int innerWidth = windowWidth - 10;
