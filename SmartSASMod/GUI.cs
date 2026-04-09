@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using SFS.UI;
 using SFS.UI.ModGUI;
 using SFS.World;
@@ -9,7 +8,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using ModButton = SFS.UI.ModGUI.Button;
 using Object = UnityEngine.Object;
-using Type = SFS.UI.ModGUI.Type;
+using LayoutType = SFS.UI.ModGUI.Type;
 
 namespace SmartSASMod
 {
@@ -52,7 +51,7 @@ namespace SmartSASMod
 
             window.CreateLayoutGroup
             (
-                Type.Vertical,
+                LayoutType.Vertical,
                 TextAnchor.UpperCenter,
                 spacing: 5,
                 new RectOffset(5, 5, 5, 5)
@@ -60,15 +59,15 @@ namespace SmartSASMod
 
             Container buttons_top = Builder.CreateContainer(window);
             Container buttons_bottom = Builder.CreateContainer(window);
-            buttons_top.CreateLayoutGroup(Type.Horizontal, spacing: 5);
-            buttons_bottom.CreateLayoutGroup(Type.Horizontal, spacing: 5);
+            buttons_top.CreateLayoutGroup(LayoutType.Horizontal, spacing: 5);
+            buttons_bottom.CreateLayoutGroup(LayoutType.Horizontal, spacing: 5);
 
             buttons = new Dictionary<DirectionMode, ModButton>
             {
-                {DirectionMode.Prograde, Builder.CreateButton(buttons_top, halfWidth, buttonHeight, onClick: () => ToggleDirection(DirectionMode.Prograde), text: "Prograde")},
-                {DirectionMode.Target, Builder.CreateButton(buttons_top, halfWidth, buttonHeight, onClick: () => ToggleDirection(DirectionMode.Target), text: "Target")},
-                {DirectionMode.Surface, Builder.CreateButton(buttons_bottom, halfWidth, buttonHeight, onClick: () => ToggleDirection(DirectionMode.Surface), text: "Surface")},
-                {DirectionMode.None, Builder.CreateButton(buttons_bottom, halfWidth, buttonHeight, onClick: () => ToggleDirection(DirectionMode.None), text: "None")},
+                {DirectionMode.Prograde, Builder.CreateButton(buttons_top, halfWidth, buttonHeight, onClick: ToggleDirection(DirectionMode.Prograde), text: "Prograde")},
+                {DirectionMode.Target, Builder.CreateButton(buttons_top, halfWidth, buttonHeight, onClick: ToggleDirection(DirectionMode.Target), text: "Target")},
+                {DirectionMode.Surface, Builder.CreateButton(buttons_bottom, halfWidth, buttonHeight, onClick: ToggleDirection(DirectionMode.Surface), text: "Surface")},
+                {DirectionMode.None, Builder.CreateButton(buttons_bottom, halfWidth, buttonHeight, onClick: ToggleDirection(DirectionMode.None), text: "None")},
             };
 
             Builder.CreateSeparator(window, innerWidth);
@@ -77,7 +76,7 @@ namespace SmartSASMod
             angleInput.field.onEndEdit.AddListener(VerifyOffsetInput);
 
             Container buttons_offset = Builder.CreateContainer(window);
-            buttons_offset.CreateLayoutGroup(Type.Horizontal, spacing: 5);
+            buttons_offset.CreateLayoutGroup(LayoutType.Horizontal, spacing: 5);
 
             Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => -Settings.settings.OffsetLarge), text: "<<<");
             Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => -Settings.settings.OffsetMedium), text: "<<");
@@ -111,7 +110,7 @@ namespace SmartSASMod
         
         internal static void OnOffsetChange(SASComponent sas)
         {
-            angleInput.Text = sas.Offset.ToString("0.00", CultureInfo.InvariantCulture);
+            angleInput.Text = sas.Offset.FloatToString();
         }
 
         private static Action CheckRocketControl(Action<SASComponent> onControl)
@@ -153,7 +152,7 @@ namespace SmartSASMod
             (
                 sas =>
                 {
-                    sas.Direction = direction != sas.Direction ? direction : DirectionMode.Default;
+                    sas.Direction = sas.Direction != direction ? direction : DirectionMode.Default;
                 }
             );
         }

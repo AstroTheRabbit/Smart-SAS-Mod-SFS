@@ -17,9 +17,8 @@ namespace SmartSASMod
             get => direction;
             set
             {
-                DirectionMode prev = direction;
                 direction = value;
-                if (IsPlayer && prev != direction)
+                if (IsPlayer)
                 {
                     GUI.OnDirectionChange(this);
                 }
@@ -31,10 +30,11 @@ namespace SmartSASMod
             get => offset;
             set
             {
-                float prev = offset;
                 offset = value;
-                if (IsPlayer && !Mathf.Approximately(prev, offset))
+                if (IsPlayer)
+                {
                     GUI.OnOffsetChange(this);
+                }
             }
         }
     }
