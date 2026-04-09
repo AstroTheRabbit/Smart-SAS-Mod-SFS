@@ -27,10 +27,13 @@ namespace SmartSASMod
             if (SceneManager.GetActiveScene().name != "World_PC")
                 return;
 
+            bool largeButtons = Settings.settings.LargeOffsetButtons;
+            int buttonCount = largeButtons ? 6 : 4;
+
             const int windowWidth = 400;
             const int innerWidth = windowWidth - 10;
             const int halfWidth = (innerWidth - 5) / 2;
-            const int offsetWidth = (innerWidth - 5*5) / 6;
+            int offsetWidth = (innerWidth - 5 * (buttonCount - 1)) / buttonCount;
             
             const int windowHeight = 300;
             const int buttonHeight = 50;
@@ -78,11 +81,13 @@ namespace SmartSASMod
             Container buttons_offset = Builder.CreateContainer(window);
             buttons_offset.CreateLayoutGroup(LayoutType.Horizontal, spacing: 5);
 
-            Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => -Settings.settings.OffsetLarge), text: "<<<");
+            if (largeButtons)
+                Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => -Settings.settings.OffsetLarge), text: "<<<");
             Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => -Settings.settings.OffsetMedium), text: "<<");
             Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => -Settings.settings.OffsetSmall), text: "<");
             
-            Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => Settings.settings.OffsetSmall), text: ">");
+            if (largeButtons)
+                Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => Settings.settings.OffsetSmall), text: ">");
             Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => Settings.settings.OffsetMedium), text: ">>");
             Builder.CreateButton(buttons_offset, offsetWidth, buttonHeight, onClick: AddOffset(() => Settings.settings.OffsetLarge), text: ">>>");
 

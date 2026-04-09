@@ -69,17 +69,19 @@ namespace SmartSASMod
                 }
             );
             CreateInput("Prograde Min. Speed", settings.ProgradeMinimumSpeed, v => settings.ProgradeMinimumSpeed = v);
-
-            ToggleWithLabel toggle = Builder.CreateToggleWithLabel
+            
+            CreateToggle
             (
-                box,
-                width, 
-                40,
-                () => settings.UseManeuvers, 
-                () => settings.UseManeuvers = !settings.UseManeuvers,
-                labelText: "Use Maneuvers"
+                "Large Offset Buttons",
+                settings.LargeOffsetButtons,
+                () =>
+                {
+                    settings.LargeOffsetButtons = !settings.LargeOffsetButtons;
+                    GUI.Init();
+                }
             );
-            ApplyFontStyle(toggle.label);
+            
+            CreateToggle("Use Maneuvers", settings.UseManeuvers, () => settings.UseManeuvers = !settings.UseManeuvers);
 
             Builder.CreateSeparator(box, width - 20);
             Builder.CreateLabel(box, width - 20, 40, text: "Angle Offset Modifiers");
@@ -99,6 +101,20 @@ namespace SmartSASMod
                 TextInput input = Builder.CreateTextInput(container, half_width, 40, text: get.FloatToString());
                 ApplyFontStyle(label);
                 AddOnChange(input, set);
+            }
+
+            void CreateToggle(string name, bool get, Action change)
+            {
+                ToggleWithLabel toggle = Builder.CreateToggleWithLabel
+                (
+                    box,
+                    width,
+                    40,
+                    () => get,
+                    change,
+                    labelText: name
+                );
+                ApplyFontStyle(toggle.label);
             }
 
             void ApplyFontStyle(Label label)
@@ -136,6 +152,10 @@ namespace SmartSASMod
         /// Minimum speed for <c>DirectionMode.Prograde</c>, below which Smart SAS switches back to <c>DirectionMode.Default</c>.
         /// </summary>
         public float ProgradeMinimumSpeed { get; set; } = 3;
+        /// <summary>
+        /// Determines whether the large set of offset buttons are shown in the GUI.
+        /// </summary>
+        public bool LargeOffsetButtons { get; set; } = true;
         /// <summary>
         /// Determines whether <c>DirectionMode.Target</c> should use ANAIS's transfer and approach maneuvers.
         /// </summary>
